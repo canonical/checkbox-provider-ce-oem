@@ -1,0 +1,57 @@
+id: audio/alsa-utils-play
+plugin: user-interact-verify
+category_id: com.canonical.plainbox::audio
+imports: from com.canonical.certification import snap
+user: root
+flags: also-after-suspend-manual
+estimated_duration: 10
+_summary: Play a wav file
+_purpose: Play a wav file and check the sound via headset
+_steps:
+ 1. Press enter and listen to the headset
+_verification:
+ Do you hear the 'Front Center' via headset?
+command:
+ model=`perl -ne 's/.*?\s(\S+).*/$1/i; print "\L$_\n\n"' /proc/device-tree/model`
+ if [ $model = "i.mx8mp" ]; then
+  amixer cset numid=5 on
+  amixer cset numid=7 on
+  amixer cset numid=2 10,10
+ fi
+ aplay $SNAP/usr/share/sounds/alsa/Front_Center.wav
+
+id: audio/alsa-utils-record-mono
+plugin: user-interact-verify
+category_id: com.canonical.plainbox::audio
+imports: from com.canonical.certification import snap
+user: root
+flags: also-after-suspend-manual
+estimated_duration: 10
+_summary: Record a wav file in mono
+_purpose: Record a wav file in mono and check the sound play
+_steps:
+ 1. Press enter and start to record for five seconds
+_verification:
+ Do you hear the sound you record clearly?
+command:
+ arecord -d 5 -t wav $PLAINBOX_SESSION_SHARE/mono.wav
+ aplay $PLAINBOX_SESSION_SHARE/mono.wav
+
+
+id: audio/alsa-utils-record-stereo
+plugin: user-interact-verify
+category_id: com.canonical.plainbox::audio
+imports: from com.canonical.certification import snap
+user: root
+flags: also-after-suspend-manual
+estimated_duration: 10
+_summary: Record a wav file in stereo
+_purpose: Record a wav file in stereo and check the sound play
+_steps:
+ 1. Press enter and start to record for five seconds
+_verification:
+ Do you hear the sound you record clearly?
+command:
+ arecord -d 5 -f cd -t wav $PLAINBOX_SESSION_SHARE/stereo.wav
+ aplay $PLAINBOX_SESSION_SHARE/stereo.wav
+

@@ -1,0 +1,28 @@
+id: ethernet/bms-t1l
+_summary: Check DUT can ping from T1L (touch flakes) to fixture.
+_purpose:
+  Check DUT can ping from T1L (touch flakes) to fixture to make sure T1L worked.
+_steps:
+  1. Connect test fixture to 4 pins touch flakes interface.
+  2. Press Enter to config the IP address for T1L interface on the device.
+     (IP will be 192.168.144.102/24)
+  3. Try to ping between DUT and test fixture (192.168.144.103/24).
+_verification:
+  Does DUT can ping the test fixture.
+plugin: user-interact-verify
+command:
+   echo "Setting up the IP address for T1L interface..."
+   modprobe g_ether
+   if  (ip -c a | grep -q lan6) ; then 
+      echo "T1L interface exist. Configuring..."
+      ip addr add 192.168.144.102/24 dev lan6
+      echo "T1L interface IP address been set as 192.168.144.102/24"
+      ip link set dev lan6 up
+   else 
+      echo "T1L interface seems not exist."
+      exit 1
+   fi
+user: root
+category_id: com.canonical.plainbox::ethernet
+estimated_duration: 5m
+flags: also-after-suspend preserve-locale

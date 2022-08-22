@@ -1,0 +1,35 @@
+id: imx/lon-test-snap
+_summary: Install test snap for LON device.
+_purpose:
+ Install test snap for LON device.
+plugin: shell
+user: root
+category_id: lon
+estimated_duration: 5
+command:
+ echo -e '\nChecking needed snap "tridium-lontest"...'
+ snap list |grep -q 'tridium-lontest'
+ if [ $? = "1" ]; then
+   echo -e '\nInstalling snap "tridium-lontest"'
+   snap install tridium-lontest --devmode --edge
+   exit 0
+ else
+  echo -e '\nSnap been installed'
+  exit 0
+ fi
+
+id: imx/lon-jace9000
+_summary: Check if LON device work on JACE9000.
+_purpose:
+ Check if LON device work on JACE9000.
+_description:
+  Please refer to https://bugs.launchpad.net/shiner/+bug/1966975/comments/2 if needed.
+plugin: shell
+user: root
+category_id: lon
+requires: manifest.has_lon_devices == 'True'
+imports: from com.canonical.plainbox import manifest
+flag: also-after-suspend
+estimated_duration: 60
+command: lon_jace9000.sh
+after: imx/lon-test-snap

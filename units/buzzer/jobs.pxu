@@ -1,0 +1,28 @@
+id: gpio/buzzer
+category_id: com.canonical.certification::gpio
+plugin: manual
+estimated_duration: 300
+_summary: GPIO buzzer control
+_purpose: Teat GPIO buzzer can be control via user space
+_steps:
+ 1. echo 30 > /sys/class/gpio/export
+ 2. echo "out" > /sys/class/gpio/gpio30/direction
+ 3. echo 1 > /sys/class/gpio/gpio30/value
+ 4. echo 0 > /sys/class/gpio/gpio30/value
+ 5. echo 30 > /sys/class/gpio/unexport
+_verification: Check heard buzzer in step 3, and buzzer stop in step 4.
+
+id: miscellanea/pwm-beeper
+plugin: user-interact-verify
+category_id: com.canonical.plainbox::miscellanea
+requires: honeywell_sku.short_name == 'i.mx6sx' or honeywell_sku.short_name == 'i.mx8mp'
+user: root
+estimated_duration: 5
+_summary: PWM Beeper test
+_purpose: Check the functionality of PWM Beeper
+_steps:
+ 1. Press enter and listen to the PWM Beeper
+_verification:
+ Do you hear the beep for one second?
+command:
+ beep_1sec

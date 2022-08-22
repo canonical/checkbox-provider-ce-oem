@@ -1,0 +1,18 @@
+id: caam/crypto-algo
+_summary: Test CAAM algorithm is in the system
+_purpose:
+ Check if caam crypto algorithms exist in /proc/crypto
+plugin: shell
+user: root
+category_id: caam
+flags: also-after-suspend
+estimated_duration: 1
+command:
+    if grep -q caam /proc/crypto
+    then
+        echo "PASS: Found caam algorithm"
+        exit 0
+    else
+        echo "FAIL: Failed to find caam algorithm"
+        exit 1
+    fi

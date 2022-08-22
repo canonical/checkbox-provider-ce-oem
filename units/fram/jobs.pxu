@@ -1,0 +1,15 @@
+id: fram/mtd-test
+plugin: shell
+category_id: fram
+_summary: Write and Read for mtd0 
+_description: 
+  Write a random value into mtd0, and read it back to compare with.
+  To make sure FRAM read and write working properly.
+estimated_duration: 5s
+user: root
+command:
+   dd if=/dev/urandom of=/tmp/testfile bs=1K count=512
+   mtd_debug erase /dev/mtd0 0x0 0x80000
+   mtd_debug write /dev/mtd0 0x0 0x80000 /tmp/testfile
+   mtd_debug read /dev/mtd0 0x0 0x80000 /tmp/readfile
+   diff /tmp/testfile /tmp/readfile && echo "mtd0 read and write file are consistency!"

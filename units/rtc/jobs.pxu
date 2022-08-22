@@ -1,0 +1,78 @@
+id: rtc/rtc0-rtc_alarm
+_summary: Test RTC0 alarm is functional
+_purpose:
+ Can read RTC0 device until alarm time appears.
+_verification:
+ RTC1 can read alarm successfully after 30s
+command:
+ rtcwake -d rtc0 -v -m disable
+ rtcwake -d rtc0 -v -m on -s 30
+plugin: shell
+user: root
+category_id: com.canonical.certification::rtc_category
+estimated_duration: 40
+
+
+id: rtc/rtc1-rtc_alarm
+_summary: Test RTC1 alarm is functional
+_purpose:
+ Can read RTC1 device until alarm time appears.
+_verification:
+ RTC1 can read alarm successfully after 30s
+command:
+ rtcwake -d rtc1 -v -m disable
+ rtcwake -d rtc1 -v -m on -s 30
+plugin: shell
+user: root
+category_id: com.canonical.certification::rtc_category
+estimated_duration: 40
+
+id: rtc/rtc0-rtc_clock
+plugin: shell
+user: root
+category_id: com.canonical.certification::rtc_category
+estimated_duration: 5
+command:
+ rtc0=$(date +"%s" -d "$(sudo hwclock --rtc /dev/rtc0 -u)")
+ rtc0_date=$(date -d @$rtc0)
+ systime=$(date +"%s")
+ systime_date=$(date -d @$systime)
+ result=$(($systime - $rtc0))
+ if [[ $result -le "5" ]]; then
+     echo "RTC Clock sync with System Clock"
+     echo $rtc0_date
+     exit 0 
+ else
+     echo "RTC Clock doesn't sync with System Clock"
+     echo "System clock=" $systime_date
+     echo "RTC clock=" $rtc0_date
+     exit 1
+ fi
+_summary: Test RTC0 clock
+_purpose:
+ Check RTC0 clock sync with system time.
+
+id: rtc/rtc1-rtc_clock
+plugin: shell
+user: root
+category_id: com.canonical.certification::rtc_category
+estimated_duration: 5
+command:
+ rtc1=$(date +"%s" -d "$(sudo hwclock --rtc /dev/rtc1 -u)")
+ rtc1_date=$(date -d @$rtc1)
+ systime=$(date +"%s")
+ systime_date=$(date -d @$systime)
+ result=$(($systime - $rtc1))
+ if [[ $result -le "5" ]]; then
+     echo "RTC Clock sync with System Clock"
+     echo $rtc1_date
+     exit 0
+ else
+     echo "RTC Clock doesn't sync with System Clock"
+     echo "System clock=" $systime_date
+     echo "RTC clock=" $rtc1_date
+     exit 1
+ fi
+_summary: Test RTC1 clock
+_purpose:
+ Check RTC1 clock sync with system time.

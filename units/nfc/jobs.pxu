@@ -1,0 +1,17 @@
+id: nfc/nfc-controller
+_summary: Check if NFC controller been probed.
+category_id: nfc
+estimated_duration: 1.0
+plugin: shell
+flags: also-after-suspend
+_purpose:
+ Check if system probe NFC controller(pn547).
+command:
+ echo "Checking NFC controller..."
+ controller=$(cat /sys/bus/i2c/devices/3-0028/name)
+ if [ "$controller" == "pn547" ];then
+  echo "NFC controller been probed. And chip name is $controller"
+ else
+  echo "NFC controller not been probed."
+  exit 1
+ fi
