@@ -1,0 +1,21 @@
+id: imx-chunkfs-full
+unit: test plan
+_name: i.MX chunkfs tests
+_description: Full chunkfs tests for i.MX devices
+include:
+nested_part:
+    imx-chunkfs-manual
+    imx-chunkfs-automated
+
+id: imx-chunkfs-manual
+unit: test plan
+_name: i.MX chunkfs manual tests
+_description: Manual chunkfs tests for i.MX devices
+include:
+
+id: imx-chunkfs-automated
+unit: test plan
+_name: i.MX chunkfs auto tests
+_description: Automated chunkfs tests for i.MX devices
+include:
+    imx/chunkfs.*

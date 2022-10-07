@@ -1,0 +1,3 @@
+unit: category
+id: npu 
+_name: i.MX NPU related test

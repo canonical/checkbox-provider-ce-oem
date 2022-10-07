@@ -1,0 +1,23 @@
+id: imx-otg-full
+unit: test plan
+_name: i.MX OTG tests
+_description: Full OTG tests for i.MX devices
+include:
+nested_part:
+    imx-otg-manual
+    imx-otg-automated
+
+id: imx-otg-manual
+unit: test plan
+_name: i.MX OTG manual tests
+_description: Manual OTG tests for i.MX devices
+include:
+    usb-otg/g_serial.*
+    usb-otg/g_mass_storage.*
+    usb-otg/g_ether.*
+
+id: imx-otg-automated
+unit: test plan
+_name: i.MX OTG auto tests
+_description: Automated OTG tests for i.MX devices
+include:

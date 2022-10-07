@@ -1,0 +1,4 @@
+unit: manifest entry
+id: has_lon_devices
+_name: Jace9000 has Two LON devices connected
+value-type: bool

@@ -1,0 +1,3 @@
+unit: category
+id: board_id 
+_name: IMX board ID test

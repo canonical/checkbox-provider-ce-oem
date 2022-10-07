@@ -1,0 +1,23 @@
+id: imx-gpu-full
+unit: test plan
+_name: iMX gpu tests
+_description: Full gpu tests for iMX devices
+include:
+nested_part:
+    imx-gpu-manual
+    imx-gpu-automated
+
+id: imx-gpu-manual
+unit: test plan
+_name: iMX gpu manual tests
+_description: Manual gpu tests for iMX devices
+include:
+    gpu/qt-based-demo
+
+id: imx-gpu-automated
+unit: test plan
+_name: iMX gpu auto tests
+_description: Automated gpu tests for iMX devices
+include:
+    gpu/import-libs
+    gpu/unit-test-2d-3d-arrays

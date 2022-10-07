@@ -1,0 +1,24 @@
+id: imx6glss-network-full
+unit: test plan
+_name: iMX6 GLSS Network tests
+_description: Full Network tests for iMX6 GLSS devices
+include:
+nested_part:
+    imx6glss-network-manual
+    imx6glss-network-automated
+
+id: imx6glss-network-manual
+unit: test plan
+_name: iMX6 GLSS Network manual tests
+_description: Manual Network tests for iMX6 GLSS devices
+include:
+    network/imx6glss-fiber-ping
+    network/imx6glss-fiber-iperf3
+    network/imx6glss-twisted-wire-ping
+    network/imx6glss-twisted-wire-iperf3
+
+id: imx6glss-network-automated
+unit: test plan
+_name: iMX6 GLSS Network auto tests
+_description: Automated Network tests for iMX6 GLSS devices
+include:

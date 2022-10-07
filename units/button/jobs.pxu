@@ -1,12 +1,12 @@
-id: button/imx6sx-s1-button 
-_summary: Test s1 button for imx6sx. 
+id: button/imx6sx-s1-button
+_summary: Test s1 button for imx6sx.
 _purpose:
  Check button s1 can trigger interrupt while press and release button.
 plugin: user-interact
 user: root
-category_id: button 
+category_id: button
 flags: also-after-suspend-manual
-estimated_duration: 30 
+estimated_duration: 30
 command:
     init_count=$(awk '/s1/{printf $2}' /proc/interrupts)
     if [ -z "$init_count" ]
@@ -18,7 +18,7 @@ command:
     i=0
     while [ $i -le 30 ]
     do
-        curr_count=$(awk '/s2/{printf $2}' /proc/interrupts)
+        curr_count=$(awk '/s1/{printf $2}' /proc/interrupts)
         if [ "$curr_count" -gt "$init_count" ] && [ $(((curr_count - init_count) % 2)) -eq 0 ]
         then
             echo "PASS: Interrupt detected!"
@@ -94,8 +94,8 @@ command:
     echo "ERROR: Interrupt detected fail"
     exit 1
 
-id: button/gnp2wire-cpu-reset 
-_summary: Test cpu_reset button for GNP 2-wire. 
+id: button/gnp2wire/cpu-reset
+_summary: Test cpu_reset button for GNP 2-wire.
 _purpose:
  Check cpu_reset button can trigger a cpu reset after press the button.
 plugin: manual
@@ -103,5 +103,68 @@ _steps:
     1.Press the CPU_Reset button.
 _verification:
     Does system reset after press CPU_Reset button?
-category_id: button 
-estimated_duration: 300 
+category_id: button
+estimated_duration: 300
+
+
+id: gpio-button-mapping
+_summary: Generates a GPIO and button mappings for further button test
+_description:
+    A button-GPIO mapping resource that relies on the user specifying in config varirable.
+    Usage of parameter: GPIO_BUTTONS={name1}:{port1} {name2}:{port2} ...
+    e.g. GPIO_BUTTONS=sys_restore:71 ip_addr:72 sys_discover:465
+estimated_duration: 0.02
+category_id: button
+plugin: resource
+command:
+    awk '{
+        split($0, record, " ")
+        for (i in record) {
+            split(record[i], data, ":")
+            printf "name: %s\nport: %s\n\n", data[1], data[2]
+        }
+    }' <<< "$GPIO_BUTTONS"
+
+unit: template
+template-resource: gpio-button-mapping
+template-unit: job
+id: button/detect-by-gpio-press-{name}
+_summary: To test system detect a signal by press {name} button
+_purpose:
+    Check {name} button can trigger a signal after pressing and releasing button.
+plugin: user-interact
+user: root
+category_id: button
+estimated_duration: 25s
+flags: also-after-suspend-manual
+command: button_test.sh -t gpio -n {name} -p {port}
+
+id: interrupts-button-mapping
+_summary: Generates a interrupts and button mappings for further button test
+_description:
+    A button-interrupts mapping resource that relies on the user specifying in config varirable.
+    Usage of parameter: INTERRUPTS_BUTTONS={name1} {name2} ...
+    e.g. INTERRUPTS_BUTTONS=s1 s2
+estimated_duration: 0.02
+plugin: resource
+command:
+    awk '{
+        split($0, record, " ")
+        for (i in record) {
+            printf "name: %s\n\n", record[i]
+        }
+    }' <<< "$INTERRUPTS_BUTTONS"
+
+unit: template
+template-resource: interrupts-button-mapping
+template-unit: job
+id: button/detect-by-interrupts-press-{name}
+_summary: To test system detect a interrupts by press {name} button
+_purpose:
+    Check {name} button can trigger a interrupts after pressing and releasing button.
+plugin: user-interact
+user: root
+category_id: button
+estimated_duration: 25s
+flags: also-after-suspend-manual
+command: button_test.sh -t interrupts -n {name}

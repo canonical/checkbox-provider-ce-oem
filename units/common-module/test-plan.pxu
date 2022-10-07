@@ -1,0 +1,44 @@
+id: imx6-common-module-full
+unit: test plan
+_name: iMX common-module tests
+_description: Full common-module tests for iMX devices
+include:
+nested_part:
+    imx6-common-module-manual
+    imx6-common-module-automated
+
+id: imx6-common-module-manual
+unit: test plan
+_name: iMX common-module manual tests
+_description: Manual common-module tests for iMX devices
+include:
+    imx/imx6-common_module_port1
+    imx/imx6-common_module_port2
+
+id: imx6-common-module-automated
+unit: test plan
+_name: iMX common-module auto tests
+_description: Automated common-module tests for iMX devices
+include:
+
+id: imx8-common-module-full
+unit: test plan
+_name: iMX common-module tests
+_description: Full common-module tests for iMX devices
+include:
+nested_part:
+    imx8-common-module-manual
+    imx8-common-module-automated
+
+id: imx8-common-module-manual
+unit: test plan
+_name: iMX common-module manual tests
+_description: Manual common-module tests for iMX devices
+include:
+    imx/imx8-common_module_porta
+
+id: imx8-common-module-automated
+unit: test plan
+_name: iMX common-module auto tests
+_description: Automated common-module tests for iMX devices
+include:

@@ -1,0 +1,4 @@
+unit: category
+id: eeprom 
+_name: IMX EEPROM Test
+

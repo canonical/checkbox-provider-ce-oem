@@ -1,0 +1,124 @@
+id: imx-cold-boot-loop-reboot1
+category_id: com.canonical.certification::stress-tests/cold-boot
+_summary: Perform cold reboot 1
+_description: This is a template that will be used to generate a stress test
+  of the system boot. Specifically this is how the device will be request a
+  reboot.
+unit: job
+plugin: shell
+environ: STRESS_BOOT_WAKEUP_DELAY
+command:
+ rtcwake -d "${RTC_DEVICE_FILE:-rtc0}" -v -m off -s "${STRESS_BOOT_WAKEUP_DELAY:-120}"
+user: root
+flags: preserve-locale noreturn autorestart
+estimated_duration: 180.0
+depends: com.canonical.certification::init-boot-loop-data
+
+id: imx-cold-boot-loop-reboot{reboot_id}
+category_id: com.canonical.certification::stress-tests/cold-boot
+_summary: Perform cold reboot {reboot_id}
+_description: This is a template that will be used to generate a stress test
+  of the system boot. Specifically this is how the device will be request a
+  reboot.
+unit: template
+template-resource: com.canonical.certification::reboot-run-generator
+template-unit: job
+plugin: shell
+environ: STRESS_BOOT_WAKEUP_DELAY STRESS_BOOT_WAIT_DELAY
+command:
+ sleep "${{STRESS_BOOT_WAIT_DELAY:-120}}"
+ rtcwake -d "${{RTC_DEVICE_FILE:-rtc0}}" -v -m off -s "${{STRESS_BOOT_WAKEUP_DELAY:-120}}"
+user: root
+flags: preserve-locale noreturn autorestart
+estimated_duration: 180.0
+after: imx-cold-boot-loop-test{reboot_id_previous}
+depends: com.canonical.certification::init-boot-loop-data
+
+id: imx-cold-boot-loop-test1
+category_id: com.canonical.certification::stress-tests/cold-boot
+_summary: Cold boot system configuration test 1
+_description: This is a template that will be used to generate a stress test
+  of the system boot. Specifically this is the test that will be performed
+  on each cycle to verify that all hardware is detected.
+unit: job
+plugin: shell
+environ: LD_LIBRARY_PATH
+command:
+  lspci -i "$SNAP"/usr/share/misc/pci.ids > "$PLAINBOX_SESSION_SHARE"/lspci_test
+  nmcli -t -f active,BSSID d w l | grep -oP "(?<=^yes:).*" > "$PLAINBOX_SESSION_SHARE"/wifi_test
+  checkbox-support-lsusb -f "$CHECKBOX_RUNTIME"/var/lib/usbutils/usb.ids -s | sort > "$PLAINBOX_SESSION_SHARE"/lsusb_test
+  if ! diff -u "$PLAINBOX_SESSION_SHARE"/lspci_original "$PLAINBOX_SESSION_SHARE"/lspci_test; then
+    echo "lspci mismatch during cycle 1"
+    exit 1
+  fi
+  if ! diff -u "$PLAINBOX_SESSION_SHARE"/wifi_original "$PLAINBOX_SESSION_SHARE"/wifi_test; then
+    echo "wifi mismatch during cycle 1"
+    exit 1
+  fi
+  if ! diff -u "$PLAINBOX_SESSION_SHARE"/lsusb_original "$PLAINBOX_SESSION_SHARE"/lsusb_test; then
+    echo "lsusb mismatch during cycle 1"
+    exit 1
+  fi
+user: root
+flags: preserve-locale
+estimated_duration: 1.0
+depends: imx-cold-boot-loop-reboot1
+
+id: imx-cold-boot-loop-test{reboot_id}
+category_id: com.canonical.certification::stress-tests/cold-boot
+_summary: Cold boot system configuration test {reboot_id}
+_description: This is a template that will be used to generate a stress test
+  of the system boot. Specifically this is the test that will be performed
+  on each cycle to verify that all hardware is detected.
+unit: template
+template-resource: com.canonical.certification::reboot-run-generator
+template-unit: job
+plugin: shell
+environ: LD_LIBRARY_PATH
+command:
+  lspci -i "$SNAP"/usr/share/misc/pci.ids > "$PLAINBOX_SESSION_SHARE"/lspci_test
+  nmcli -t -f active,BSSID d w l | grep -oP "(?<=^yes:).*" > "$PLAINBOX_SESSION_SHARE"/wifi_test
+  checkbox-support-lsusb -f "$CHECKBOX_RUNTIME"/var/lib/usbutils/usb.ids -s | sort > "$PLAINBOX_SESSION_SHARE"/lsusb_test
+  if ! diff -u "$PLAINBOX_SESSION_SHARE"/lspci_original "$PLAINBOX_SESSION_SHARE"/lspci_test; then
+    echo "lspci mismatch during cycle {reboot_id}"
+    exit 1
+  fi
+  if ! diff -u "$PLAINBOX_SESSION_SHARE"/wifi_original "$PLAINBOX_SESSION_SHARE"/wifi_test; then
+    echo "wifi mismatch during cycle {reboot_id}"
+    exit 1
+  fi
+  if ! diff -u "$PLAINBOX_SESSION_SHARE"/lsusb_original "$PLAINBOX_SESSION_SHARE"/lsusb_test; then
+    echo "lsusb mismatch during cycle {reboot_id}"
+    exit 1
+  fi
+user: root
+flags: preserve-locale
+estimated_duration: 1.0
+depends: imx-cold-boot-loop-reboot{reboot_id}
+
+unit: template
+template-resource: com.canonical.certification::stress_s3_iterations
+template-unit: job
+template-engine: jinja2
+plugin: shell
+flags: preserve-locale
+category_id: com.canonical.certification::stress-tests/suspend
+id: stress-tests/imx-suspend_{{ s3_iterations }}_cycles
+imports:
+  from com.canonical.certification import sleep
+  from com.canonical.certification import rtc
+equires:
+  sleep.mem == 'supported'
+  rtc.state == 'supported'
+estimated_duration: 2400.0
+environ: PLAINBOX_SESSION_SHARE STRESS_S3_SLEEP_DELAY STRESS_S3_WAIT_DELAY LD_LIBRARY_PATH
+user: root
+command:
+ for i in {1..{{ s3_iterations }}};
+ do
+    echo "Iteration $i"
+    rtcwake -d "${RTC_DEVICE_FILE:-rtc0}" -v -m mem -s "${STRESS_BOOT_WAKEUP_DELAY:-120}"
+ done
+_description:
+ PURPOSE:
+    This is an automated stress test that wstress-tests/suspendill force the system to suspend/resume for {{ s3_iterations }} cycles.

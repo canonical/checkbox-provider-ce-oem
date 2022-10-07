@@ -183,13 +183,13 @@ category_id: com.canonical.certification::serial
 estimated_duration: 600
 
 unit: job
-id: sugarland-serial/rs485
+id: sugarland-serial/pdk-rs485
 _summary: Sugarland Serial TX/RX is operational on the RS-485
 _purpose:
  Check that comms work on the serial port (RS485 configuration)
 _steps:
- 1. Connect RS-485 A to P43 RS-485 A
-    Connect RS-485 B to P43 RS-485 B
+ 1. Connect RS-485 A out+ to RS-485 B in+
+    Connect RS-485 A out- to RS-485 B in-
  2. Modified the Baud rate as follow:
     $ sudo stty -F /dev/ttymxc3 ispeed 115200 ospeed 115200 -echo -onlcr -ixon -ixoff
     $ stty -F /dev/ttymxc4 ispeed 115200 ospeed 115200 -echo -onlcr -ixon -ixoff
@@ -217,57 +217,29 @@ _summary: GNP 2-wire serial TX/RX is operational on the RS-485 TB11 and TB13
 _purpose:
  Check that comms work on the serial port (RS485 configuration)
 _steps:
- 1. Connect TB11 RS-485 A to TB13 RS-485 A 
+ 1. Connect TB11 RS-485 A to TB13 RS-485 A
     Connect TB11 RS-485 B to TB13 RS-485 B
  2. Modified the Baud rate as follow:
-    $ sudo stty -F /dev/ttymxc1 ispeed 115200 ospeed 115200 -echo -onlcr -ixon -ixoff
-    $ stty -F /dev/ttymxc3 ispeed 115200 ospeed 115200 -echo -onlcr -ixon -ixoff
+    $ sudo stty -F /dev/ttymxc0 ispeed 115200 ospeed 115200 -echo -onlcr -ixon -ixoff
+    $ stty -F /dev/ttymxc2 ispeed 115200 ospeed 115200 -echo -onlcr -ixon -ixoff
  3. At client side, open a terminal and ssh into the SUT
  4. Run both SUT and client terminals as root:
     $ sudo su
  5. listen and wait for data from the client side
-    $ cat /dev/ttymxc1
+    $ cat /dev/ttymxc0
  6. send data from the SUT
-    $ echo test > /dev/ttymxc3
+    $ echo test > /dev/ttymxc2
  7. swap the tty port and repeat steps 5 & 6:
     listen data from the client side
-    $ cat /dev/ttymcx3
+    $ cat /dev/ttymcx2
     send data from the SUT
-    $ echo test > /dev/ttymxc1
+    $ echo test > /dev/ttymxc0
 _verification:
  Check that the "test" pattern is well transmitted to the device set as the receiver
 plugin: manual
 category_id: com.canonical.certification::serial
 estimated_duration: 600
 
-unit: job
-id: shiner-serial/2wire-rs485-TB12-TB13
-_summary: GNP 2-wire serial TX/RX is operational on the RS-485 TB12 and TB13
-_purpose:
- Check that comms work on the serial port (RS485 configuration)
-_steps:
- 1. Connect TB12 RS-485 A to TB13 RS-485 A 
-    Connect TB12 RS-485 B to TB13 RS-485 B
- 2. Modified the Baud rate as follow:
-    $ sudo stty -F /dev/ttymxc2 ispeed 115200 ospeed 115200 -echo -onlcr -ixon -ixoff
-    $ stty -F /dev/ttymxc3 ispeed 115200 ospeed 115200 -echo -onlcr -ixon -ixoff
- 3. At client side, open a terminal and ssh into the SUT
- 4. Run both SUT and client terminals as root:
-    $ sudo su
- 5. listen and wait for data from the client side
-    $ cat /dev/ttymxc2
- 6. send data from the SUT
-    $ echo test > /dev/ttymxc3
- 7. swap the tty port and repeat steps 5 & 6:
-    listen data from the client side
-    $ cat /dev/ttymcx3
-    send data from the SUT
-    $ echo test > /dev/ttymxc2
-_verification:
- Check that the "test" pattern is well transmitted to the device set as the receiver
-plugin: manual
-category_id: com.canonical.certification::serial
-estimated_duration: 600
 
 id: shiner-serial/rs232-console
 _summary: Serial debugging console is enabled and operational
@@ -285,3 +257,18 @@ _verification:
 plugin: manual
 category_id: com.canonical.certification::serial
 estimated_duration: 600
+
+
+id: shiner-serial/gnp-2wire-plc-reset
+_summary: Internal PLC UART connection is enabled and operational
+_purpose:
+  Check system can retrieve PLC ST8500 reset message through internal UART
+_description:
+  This test will create a connect through internal UART interface.
+  And switch the GPIO value to reset PLC ST8500 device.
+  Then monitor the PLC reset message.
+plugin: shell
+user: root
+category_id: com.canonical.certification::serial
+command: plc_uart_test.sh 114 /dev/ttymxc3
+estimated_duration: 60s

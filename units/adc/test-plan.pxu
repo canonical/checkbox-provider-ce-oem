@@ -1,0 +1,21 @@
+id: imx-adc-full
+unit: test plan
+_name: iMX ADC tests
+_description: ADC tests for iMX devices
+include:
+nested_part:
+    imx-adc-manual
+    imx-adc-automated
+
+id: imx-adc-manual
+unit: test plan
+_name: iMX ADC manual tests
+_description: Manual ADC tests for iMX devices
+include:
+
+id: imx-adc-automated
+unit: test plan
+_name: iMX ADC auto tests
+_description: Automated ADC tests for iMX devices
+include:
+    adc/imx6-internal-adc

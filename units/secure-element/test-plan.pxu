@@ -1,0 +1,23 @@
+id: imx-secure-element-full
+unit: test plan
+_name: i.MX secure-element tests
+_description: Full secure-element tests for iMX devices
+include:
+nested_part:
+    imx-secure-element-manual
+    imx-secure-element-automated
+
+id: imx-secure-element-manual
+unit: test plan
+_name: i.MX secure-element manual tests
+_description: Manual secure-element tests for iMX devices
+include:
+
+id: imx-secure-element-automated
+unit: test plan
+_name: i.MX secure-element auto tests
+_description: Automated secure-element tests for iMX devices
+bootstrap_include:
+    gadget_name
+include:
+    secure-element/.*

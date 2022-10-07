@@ -1,0 +1,21 @@
+id: imx6-board-id-full
+unit: test plan
+_name: iMX board-id tests
+_description: Full board-id tests for iMX devices
+include:
+nested_part:
+    imx6-board-id-manual
+    imx6-board-id-automated
+
+id: imx6-board-id-manual
+unit: test plan
+_name: iMX board-id manual tests
+_description: Manual board-id tests for iMX devices
+include:
+
+id: imx6-board-id-automated
+unit: test plan
+_name: iMX board-id auto tests
+_description: Automated board-id tests for iMX devices
+include:
+    imx/imx6-board-id

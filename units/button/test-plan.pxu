@@ -1,0 +1,32 @@
+id: imx6-button-full
+unit: test plan
+_name: iMX button tests
+_description: Full button tests for iMX devices
+include:
+nested_part:
+    imx6-button-manual
+    imx6-button-automated
+
+id: imx6-button-manual
+unit: test plan
+_name: iMX button manual tests
+_description: Manual button tests for iMX devices
+include:
+    button/imx6sx-s1-button
+    button/imx6sx-s2-button
+
+id: imx6-button-automated
+unit: test plan
+_name: iMX button auto tests
+_description: Automated button tests for iMX devices
+include:
+
+id: imx8-gnp2wire-button-manual
+unit: test plan
+_name: iMX button manual tests for GNP-2wire board
+_description: Manual button tests for iMX GNP-2wire board
+bootstrap_include:
+    gpio-button-mapping
+include:
+    button/detect-by-gpio-press-.*
+    button/gnp2wire/cpu-reset

@@ -1,0 +1,137 @@
+id: imx-pdk-serial-full
+unit: test plan
+_name: i.MX serial tests
+_description: Full serial tests for i.MX devices
+include:
+nested_part:
+    imx-pdk-serial-manual
+    imx-pdk-serial-automated
+
+id: imx-pdk-serial-manual
+unit: test plan
+_name: i.MX serial manual tests
+_description: Manual serial tests for i.MX devices
+include:
+    shiner-serial/pdk-rs485
+
+id: imx-pdk-serial-automated
+unit: test plan
+_name: i.MX serial auto tests
+_description: Automated serial tests for i.MX devices
+include:
+
+id: imx-bms-serial-full
+unit: test plan
+_name: i.MX serial tests
+_description: Full serial tests for i.MX devices
+include:
+nested_part:
+    imx-bms-serial-manual
+    imx-bms-serial-automated
+
+id: imx-bms-serial-manual
+unit: test plan
+_name: i.MX serial manual tests
+_description: Manual serial tests for i.MX devices
+include:
+    shiner-serial/bms-rs485-p6-p7
+    shiner-serial/bms-rs485-p7-touchflakes
+    shiner-serial/bms-rs485-p2-j2
+
+id: imx-bms-serial-automated
+unit: test plan
+_name: i.MX serial auto tests
+_description: Automated serial tests for i.MX devices
+include:
+    shiner-serial/bms-init-rj11
+
+id: imx-fire-serial-full
+unit: test plan
+_name: i.MX serial tests
+_description: Full serial tests for i.MX devices
+include:
+nested_part:
+    imx-fire-serial-manual
+    imx-fire-serial-automated
+
+id: imx-fire-serial-manual
+unit: test plan
+_name: i.MX serial manual tests
+_description: Manual serial tests for i.MX devices
+include:
+    shiner-serial/fire-rs485-p43
+    shiner-serial/fire-rs485-p41-p43
+
+id: imx-fire-serial-automated
+unit: test plan
+_name: i.MX serial auto tests
+_description: Automated serial tests for i.MX devices
+include:
+
+id: imx-sugarland-serial-full
+unit: test plan
+_name: i.MX serial tests
+_description: Full serial tests for i.MX devices
+include:
+nested_part:
+    imx-sugarland-serial-manual
+    imx-sugarland-serial-automated
+
+id: imx-sugarland-serial-manual
+unit: test plan
+_name: i.MX serial manual tests
+_description: Manual serial tests for i.MX devices
+include:
+    sugarland-serial/pdk-rs485
+
+id: imx-sugarland-serial-automated
+unit: test plan
+_name: i.MX serial auto tests
+_description: Automated serial tests for i.MX devices
+include:
+
+id: imx-2wire-serial-full
+unit: test plan
+_name: i.MX serial tests
+_description: Full serial tests for i.MX devices
+include:
+nested_part:
+    imx-2wire-serial-manual
+    imx-2wire-serial-automated
+
+id: imx-2wire-serial-manual
+unit: test plan
+_name: i.MX serial manual tests
+_description: Manual serial tests for i.MX devices
+include:
+    shiner-serial/2wire-rs485-.*
+    shiner-serial/rs232-console
+
+id: imx-2wire-serial-automated
+unit: test plan
+_name: i.MX GNP-2Wire serial auto tests
+_description: Automated serial tests for i.MX devices
+include:
+    shiner-serial/gnp-2wire-plc-reset
+
+id: imx-jace-serial-full
+unit: test plan
+_name: i.MX serial tests
+_description: Full serial tests for i.MX devices
+include:
+nested_part:
+    imx-jace-serial-manual
+    imx-jace-serial-automated
+
+id: imx-jace-serial-manual
+unit: test plan
+_name: i.MX serial manual tests
+_description: Manual serial tests for i.MX devices
+include:
+    shiner-serial/rs232-console
+
+id: imx-jace-serial-automated
+unit: test plan
+_name: i.MX serial auto tests
+_description: Automated serial tests for i.MX devices
+include:

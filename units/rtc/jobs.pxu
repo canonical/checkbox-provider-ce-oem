@@ -1,78 +1,84 @@
-id: rtc/rtc0-rtc_alarm
-_summary: Test RTC0 alarm is functional
-_purpose:
- Can read RTC0 device until alarm time appears.
-_verification:
- RTC1 can read alarm successfully after 30s
-command:
- rtcwake -d rtc0 -v -m disable
- rtcwake -d rtc0 -v -m on -s 30
+id: rtc/rtc_number
+_summary: Check the number of RTC as expected.
+_description:
+    Check the number of RTC on platform as expected.
 plugin: shell
 user: root
-category_id: com.canonical.certification::rtc_category
-estimated_duration: 40
-
-
-id: rtc/rtc1-rtc_alarm
-_summary: Test RTC1 alarm is functional
-_purpose:
- Can read RTC1 device until alarm time appears.
-_verification:
- RTC1 can read alarm successfully after 30s
+estimated_duration: 1.0
 command:
- rtcwake -d rtc1 -v -m disable
- rtcwake -d rtc1 -v -m on -s 30
-plugin: shell
-user: root
-category_id: com.canonical.certification::rtc_category
-estimated_duration: 40
+    if [ -z $TOTAL_RTC_NUM ]; then 
+        TOTAL_RTC_NUM=1; 
+    fi
+    SYSFS_RTC_NUM=`ls /dev/rtc[0-9] | wc -l`
+    echo "TOTAL_RTC_NUM: $TOTAL_RTC_NUM"
+    echo "Number of RTC devices found in sysfs: $SYSFS_RTC_NUM"
+    if [ $SYSFS_RTC_NUM != $TOTAL_RTC_NUM ]; then
+        echo "RTC number mismatch"
+        exit 1
+    else
+        echo "RTC number matched"
+    fi
 
-id: rtc/rtc0-rtc_clock
-plugin: shell
+id: rtc_list
+_summary: Generates a rtc list for the platform
+_description:
+ List out all rtc devices on platform, and generate a list for it.
+ Define TOTAL_RTC_NUM in config file if platform have more then one
+ RTC deivces.
+plugin: resource
 user: root
-category_id: com.canonical.certification::rtc_category
-estimated_duration: 5
+estimated_duration: 1.0
 command:
- rtc0=$(date +"%s" -d "$(sudo hwclock --rtc /dev/rtc0 -u)")
- rtc0_date=$(date -d @$rtc0)
- systime=$(date +"%s")
- systime_date=$(date -d @$systime)
- result=$(($systime - $rtc0))
- if [[ $result -le "5" ]]; then
-     echo "RTC Clock sync with System Clock"
-     echo $rtc0_date
-     exit 0 
- else
-     echo "RTC Clock doesn't sync with System Clock"
-     echo "System clock=" $systime_date
-     echo "RTC clock=" $rtc0_date
-     exit 1
- fi
-_summary: Test RTC0 clock
-_purpose:
- Check RTC0 clock sync with system time.
+    rtcs=$(ls /dev/rtc[0-9] | awk -F "/" '{print $3}')
+    for c in ${rtcs}; do
+        echo "rtc: ${c}"
+        echo ""
+    done
 
-id: rtc/rtc1-rtc_clock
+unit: template
+template-resource: rtc_list
+template-unit: job
+id: rtc/rtc_alarm_{rtc}
+_summary: RTC alarm of {rtc} is worked
+_purpose:
+    Check if RTC alarm of {rtc}
 plugin: shell
 user: root
 category_id: com.canonical.certification::rtc_category
 estimated_duration: 5
-command:
- rtc1=$(date +"%s" -d "$(sudo hwclock --rtc /dev/rtc1 -u)")
- rtc1_date=$(date -d @$rtc1)
- systime=$(date +"%s")
- systime_date=$(date -d @$systime)
- result=$(($systime - $rtc1))
- if [[ $result -le "5" ]]; then
-     echo "RTC Clock sync with System Clock"
-     echo $rtc1_date
-     exit 0
- else
-     echo "RTC Clock doesn't sync with System Clock"
-     echo "System clock=" $systime_date
-     echo "RTC clock=" $rtc1_date
-     exit 1
- fi
-_summary: Test RTC1 clock
+flags: also-after-suspend
+command: 
+    if [ -f "/sys/class/rtc/{rtc}/device/power/wakeup" ]; then 
+        rtcwake -d {rtc} -v -m on -s 30
+    else 
+        echo "{rtc} not support wakeup"
+        exit 1 
+    fi
+
+unit: template
+template-resource: rtc_list
+template-unit: job
+id: rtc/rtc_clock_{rtc}
+_summary: RTC clock of {rtc} is synced
 _purpose:
- Check RTC1 clock sync with system time.
+    Check if RTC clock of {rtc}
+plugin: shell
+user: root
+category_id: com.canonical.certification::rtc_category
+estimated_duration: 5
+flags: also-after-suspend
+command: 
+    rtctime=$(date +"%s" -d "$( hwclock --rtc /dev/{rtc} -u)")
+    rtc_date=$(date -d @$rtctime)
+    systime=$(date +"%s")
+    systime_date=$(date -d @$systime)
+    result=$(($systime - $rtctime))
+    if [[ $result -le "5" ]]; then
+        echo "{rtc} Clock sync with System Clock"
+        echo $rtc_date
+    else
+        echo "{rtc} Clock doesn't sync with System Clock"
+        echo "System clock=" $systime_date
+        echo "RTC clock=" $rtc_date
+        exit 1
+    fi

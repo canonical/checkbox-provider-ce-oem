@@ -1,0 +1,21 @@
+id: imx-mstp-full
+unit: test plan
+_name: i.MX mstp tests
+_description: Full mstp tests for iMX devices
+include:
+nested_part:
+    imx-mstp-manual
+    imx-mstp-automated
+
+id: imx-mstp-manual
+unit: test plan
+_name: i.MX mstp manual tests
+_description: Manual mstp tests for iMX devices
+include:
+    imx/mstp-.*
+
+id: imx-mstp-automated
+unit: test plan
+_name: i.MX mstp auto tests
+_description: Automated mstp tests for iMX devices
+include:
