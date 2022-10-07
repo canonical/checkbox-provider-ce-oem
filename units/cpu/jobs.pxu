@@ -1,6 +1,6 @@
 plugin: shell
 category_id: com.canonical.plainbox::cpu
-id: zhongyi_cpu/offlining_test
+id: imx_cpu/offlining_test
 estimated_duration: 128.0
 imports: from com.canonical.certification import cpuinfo
 user: root
@@ -13,7 +13,7 @@ requires: int(cpuinfo.count) > 1 and cpuinfo.platform == 'aarch64'
 
 plugin: shell
 category_id: com.canonical.plainbox::cpu
-id: zhongyi_cpu/frequency_governors
+id: imx_cpu/frequency_governors
 estimated_duration: 22.0
 user: root
 command: nice -n -20 frequency_governors_test.py --debug
