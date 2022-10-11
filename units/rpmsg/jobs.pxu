@@ -1,4 +1,4 @@
-id: medina-rpmsg/ping-pang
+id: imx-rpmsg/ping-pang
 _summary: Check if M4 core RPMSG ping-pang demo work.
 category_id: rpmsg
 estimated_duration: 300
