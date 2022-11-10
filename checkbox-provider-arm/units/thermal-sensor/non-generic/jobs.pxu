@@ -1,0 +1,23 @@
+id: sensor/imx-thermal-external
+_summary: Check IMX External Thermal Sensor
+plugin: shell
+user: root
+command:
+    echo "Starting stress-ng in 10s"
+    sleep 10
+    FILE=/sys/class/hwmon/hwmon0/temp1_input
+    if [ -f "$FILE" ]
+    then
+        cur=$(cat "$FILE")
+        printf "Before stress: %0.3f°C\n" $(bc -l <<< "$cur/1000")
+        stress-ng --cpu 8 --io 4 --vm 2 --vm-bytes 128M --fork 4 --timeout 20s
+        new=$(cat "$FILE")
+        printf "After stress:  %0.3f°C\n" $(bc -l <<< "$new/1000")
+        [[ $new -gt $cur ]]
+    else
+        echo "ERROR: Cannot find the thermal sensor node in $FILE"
+        exit 1
+    fi
+category_id: sensor
+estimated_duration: 30
+flags: preserve-locale also-after-suspend

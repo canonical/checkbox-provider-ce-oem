@@ -1,0 +1,107 @@
+id: button/imx6sx-s1-button
+_summary: Test s1 button for imx6sx.
+_purpose:
+ Check button s1 can trigger interrupt while press and release button.
+plugin: user-interact
+user: root
+category_id: imx-button 
+flags: also-after-suspend
+estimated_duration: 30
+command:
+    init_count=$(awk '/s1/{printf $2}' /proc/interrupts)
+    if [ -z "$init_count" ]
+    then
+        echo "ERROR: S1 button not found"
+        exit 1
+    fi
+    echo "Press and release the S1 button."
+    i=0
+    while [ $i -le 30 ]
+    do
+        curr_count=$(awk '/s1/{printf $2}' /proc/interrupts)
+        if [ "$curr_count" -gt "$init_count" ] && [ $(((curr_count - init_count) % 2)) -eq 0 ]
+        then
+            echo "PASS: Interrupt detected!"
+            exit 0
+        fi
+        sleep 1
+        i=$((i + 1))
+    done
+    echo "ERROR: Interrupt detected fail"
+    exit 1
+
+id: button/imx6sx-s2-button
+_summary: Test s2 button for imx6sx.
+_purpose:
+ Check button s2 can trigger interrupt while press and release button.
+plugin: user-interact
+user: root
+category_id: imx-button 
+flags: also-after-suspend
+estimated_duration: 30
+command:
+    init_count=$(awk '/s2/{printf $2}' /proc/interrupts)
+    if [ -z "$init_count" ]
+    then
+        echo "ERROR: S2 button not found"
+        exit 1
+    fi
+    echo "Press and release the S2 button."
+    i=0
+    while [ $i -le 30 ]
+    do
+        curr_count=$(awk '/s2/{printf $2}' /proc/interrupts)
+        if [ "$curr_count" -gt "$init_count" ] && [ $(((curr_count - init_count) % 2)) -eq 0 ]
+        then
+            echo "PASS: Interrupt detected!"
+            exit 0
+        fi
+        sleep 1
+        i=$((i + 1))
+    done
+    echo "ERROR: Interrupt detected fail"
+    exit 1
+
+id: button/imx6glss-bluetooth-enabler-switch
+_summary: Test Bluetooth enabler switch button for imx6glss.
+_purpose:
+ Check Bluetooth enabler switch button can trigger interrupt after pressing and releasing button.
+plugin: user-interact
+user: root
+category_id: imx-button 
+flags: also-after-suspend
+estimated_duration: 30
+command:
+    init_count=$(awk '/bt-enable/{printf $2}' /proc/interrupts)
+    if [ -z "$init_count" ]
+    then
+        echo "ERROR: bt-enable button not found"
+        exit 1
+    fi
+    echo "Press and release the Bluetooth enabler switch button locates at S1(BT-EN)"
+    i=0
+    while [ $i -le 30 ]
+    do
+        curr_count=$(awk '/bt-enable/{printf $2}' /proc/interrupts)
+        if [ "$curr_count" -gt "$init_count" ] && [ $(((curr_count - init_count) % 2)) -eq 0 ]
+        then
+            echo "PASS: Interrupt detected!"
+            exit 0
+        fi
+        sleep 1
+        i=$((i + 1))
+    done
+    echo "ERROR: Interrupt detected fail"
+    exit 1
+
+id: button/gnp2wire/cpu-reset
+_summary: Test cpu_reset button for GNP 2-wire.
+_purpose:
+ Check cpu_reset button can trigger a cpu reset after press the button.
+plugin: manual
+_steps:
+    1.Press the CPU_Reset button.
+_verification:
+    Does system reset after press CPU_Reset button?
+category_id: imx-button 
+estimated_duration: 300

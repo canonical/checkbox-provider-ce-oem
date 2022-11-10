@@ -1,0 +1,19 @@
+id: connect-plugs
+estimated_duration: 60
+plugin: resource
+user: root
+command:
+    checkbox-support-snap_connect \
+        hardware-observe:core:hardware-observe \
+        mount-observe:core:mount-observe \
+        network-bind:core:network-bind \
+        system-observe:core:system-observe \
+        bluez:bluez:service \
+        network-manager:network-manager:service \
+        modem-manager:modem-manager:service \
+        # bluetooth-control:core:bluetooth-control \
+        # pulseaudio:pulseaudio:service \
+        # tpm:core:tpm \
+        # home:core:home
+_summary: Connect all checkbox plugs
+_description: Connect all checkbox plugs

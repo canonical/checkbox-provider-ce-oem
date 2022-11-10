@@ -1,0 +1,62 @@
+id: mtd/total-numbers
+_summary: Generates a mtd resource based on user supplied configuration
+_description:
+ A mtd resource that relies on the user specifying the number of mtd. 
+ etc: MRAM/FRAM/NOR-Flash. This is to allow template jobs to then be instantiated.
+ Usage of parameter: {type1}:{number1} {type2}:{number2} {type3}:{number3}
+ TOTAL_MTD_NUM=mram:1 norflash:1
+plugin: resource
+estimated_duration: 1.0
+command: mtd.sh total "$TOTAL_MTD_NUM"
+
+unit: template
+template-resource: mtd/total-numbers
+template-unit: job
+id: mtd/check-numbers-{TYPE}
+_summary: To check the total number of {TYPE} are correct
+_purpose:
+ Check total number of {TYPE} on platform are correct
+plugin: shell
+user: root
+category_id: mtd
+estimated_duration: 5
+flags: also-after-suspend
+command: mtd.sh count {TYPE} {NUM}
+requires: manifest.has_mtd == 'True'
+imports: from com.canonical.plainbox import manifest
+
+id: mtd/mtd-list
+plugin: resource
+_summary: Gather list of mtd on platform
+_description:
+ Gather list of all Memory Technology Device on platform
+estimated_duration: 1s
+command: mtd.sh list 
+
+unit: template
+template-resource: mtd/mtd-list
+template-unit: job
+id: mtd/read-write-test-{MTD_NAME}-{MTD_TYPE}
+category_id: mtd
+_summary: Test {MTD_NAME}-{MTD_TYPE} on platform
+_description:
+  Write a random value into {MTD_NAME}-{MTD_TYPE}, and read it back to compare with.
+  To make sure {MTD_NAME}-{MTD_TYPE} read and write working properly.
+plugin: shell
+user: root
+flags: also-after-suspend
+estimated_duration: 30
+command:
+  echo "##### MTD info #####"
+  mtd_debug info /dev/{MTD_NAME}
+  echo "##### Starting MTD read / write test #####"
+  dd if=/dev/urandom of=/tmp/testfile bs=1K count=512
+  echo "Erase MTD..."
+  mtd_debug erase /dev/{MTD_NAME} 0x0 0x80000
+  echo "Write file to MTD..."
+  mtd_debug write /dev/{MTD_NAME} 0x0 0x80000 /tmp/testfile
+  echo "Read file from MTD..."
+  mtd_debug read /dev/{MTD_NAME} 0x0 0x80000 /tmp/readfile
+  diff /tmp/testfile /tmp/readfile && echo "{MTD_NAME} read and write file are consistency!"
+requires: manifest.has_mtd == 'True'
+imports: from com.canonical.plainbox import manifest

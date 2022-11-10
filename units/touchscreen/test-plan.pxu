@@ -1,9 +1,0 @@
-id: shiner-touchscreen-evdev
-unit: test plan
-_name: Touchscreen evdev tests
-_description:
- Touchscreen evdev tests
-include:
- shiner-touchscreen/evdev.*
-bootstrap_include:
-    com.canonical.certification::device

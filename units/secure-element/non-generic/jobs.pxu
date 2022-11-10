@@ -1,0 +1,44 @@
+id: secure-element/snap-install
+_summary: Check "hon-ps-eccx08-tool" been installed.
+_purpose:
+ Check "hon-ps-eccx08-tool" been installed.
+plugin: shell
+user: root
+category_id: secure-element
+estimated_duration: 5
+command:
+ echo -e '\nChecking needed snap "hon-ps-eccx08-tool"...'
+ snap list |grep 'hon-ps-eccx08-tool' > /dev/null
+ if [ $? = "1" ]; then
+   echo -e '\nInstalling snap "hon-ps-eccx08-tool"'
+   snap install hon-ps-eccx08-tool --devmode --edge
+ else
+  echo -e '\nSnap been installed'
+ fi
+
+id: secure-element/atecc
+_summary: Test secure element can generate a random value.
+_purpose:
+ Check secure element revision and can generate a random value.
+plugin: shell
+user: root
+category_id: secure-element
+estimated_duration: 5
+flags: also-after-suspend
+command:
+ echo "Initialing secure element..."
+ hon-ps-eccx08-tool.prov config default
+ echo -e '\nChecking secure element...'
+ rev=`hon-ps-eccx08-tool.prov read | grep -i "serial number\|Revision"`
+ echo $rev | grep '608\|508' > /dev/null
+ if [ $? = "0" ]; then
+  echo -e '\n'$rev
+  echo -e '\nSecure element is correct!'
+ else
+  echo -e '\n'$rev
+  echo -e '\nSecure element is not correct!'
+  exit 1
+ fi
+  echo -e '\nObtain 256 bit random value from chip...\n'
+  hon-ps-eccx08-tool.prov random /tmp/random_test
+after: secure-element/snap-install

@@ -1,0 +1,242 @@
+id: pdk-leds
+plugin: resource
+requires: honeywell_sku.short_name == 'i.mx8mp'
+_summary: Gather list of test led indicators for Honeywell pdk
+_description:
+ Honeywell pdk have 8 led indicators. Get a list of led so can divide
+ uptests. Complete led list: add-on, bte-conn, bt-status, cloud-conn,
+ module-conn, panel-conn trouble, wifi-conn.
+estimated_duration: 1s
+command:
+ LEDS="trouble bt-status panel-conn cloud-conn wifi-conn bte-conn add-on module-conn"
+ for c in $LEDS; do
+  echo "leds: $c"
+  echo ""
+ done
+
+unit: template
+template-resource: pdk-leds
+template-unit: job
+id: led/pdk-led-indicators-{leds}
+requires: honeywell_sku.short_name == 'i.mx8mp'
+category_id: led-indicator
+_summary: Check control of {leds} led indecator.
+_description:
+  Light on and off {leds} led for 3 times.
+ PURPOSE:
+     Check that {leds} led is controlable
+ STEPS:
+     1.Press enter and observe led behavior
+ VERIFICATION:
+     Does the {leds} led blinking?
+plugin: user-interact-verify
+user: root
+flags: also-after-suspend
+estimated_duration: 20.0
+command:
+ set -e
+ for i in $(seq 1 3); do
+    for y in 0 248; do
+       echo $y > /sys/class/leds/{leds}/brightness
+       test `cat /sys/class/leds/{leds}/brightness` == $y || exit 1
+       sleep 1
+    done
+ done
+ echo 0 > /sys/class/leds/{leds}/brightness
+
+id: bms-green-leds
+plugin: resource
+requires: honeywell_sku.short_name == 'i.mx8mp'
+_summary: Gather list of test green leds for Honeywell bms
+_description:
+ Honeywell bms have green leds. Get a list of green leds so can divide
+ uptests. Complete green leds list: DL1, DL2, DL3, DL4, DL5, DL6, DL7, DL8, DL9, DL10,
+ DL11, DL12, DL13, DL14, DL15, DL16
+estimated_duration: 1s
+command:
+ LEDS="DL1 DL2 DL3 DL4 DL5 DL6 DL7 DL8 DL9 DL10 DL11 DL12 DL13 DL14 DL15 DL16"
+ for c in $LEDS; do
+  echo "leds: pca955x:$c:green"
+  echo ""
+ done
+
+unit: template
+template-resource: bms-green-leds
+template-unit: job
+id: led/bms-green-leds-{leds}
+requires: honeywell_sku.short_name == 'i.mx8mp'
+category_id: led-indicator
+_summary: Check control of green {leds} led.
+_description:
+  Light on and off green {leds} led for 3 times.
+ PURPOSE:
+     Check that green {leds} led is controlable
+ STEPS:
+     1.Press enter and observe led behavior
+ VERIFICATION:
+     Does the green {leds} led blinking?
+plugin: user-interact-verify
+user: root
+flags: also-after-suspend
+estimated_duration: 20.0
+command:
+ set -e
+ for i in $(seq 1 3); do
+    for y in 0 248; do
+       echo $y > /sys/class/leds/{leds}/brightness
+       test `cat /sys/class/leds/{leds}/brightness` == $y || exit 1
+       sleep 1
+    done
+ done
+ echo 0 > /sys/class/leds/{leds}/brightness
+
+id: bms-red-leds
+plugin: resource
+requires: honeywell_sku.short_name == 'i.mx8mp'
+_summary: Gather list of test red leds for Honeywell bms
+_description:
+ Honeywell bms have red leds. Get a list of red leds so can divide
+ uptests. Complete red leds list: DL1, DL2, DL3, DL4, DL5, DL6, DL7, DL8, DL9, DL10, 
+ DL11, DL12, DL13, DL14, DL15, DL16
+estimated_duration: 1s
+command:
+ LEDS="DL1 DL2 DL3 DL4 DL5 DL6 DL7 DL8 DL9 DL10 DL11 DL12 DL13 DL14 DL15 DL16"
+ for c in $LEDS; do
+  echo "leds: pca955x:$c:red"
+  echo ""
+ done
+
+unit: template
+template-resource: bms-red-leds
+template-unit: job
+id: led/bms-red-leds-{leds}
+requires: honeywell_sku.short_name == 'i.mx8mp'
+category_id: led-indicator
+_summary: Check control of red {leds} led.
+_description:
+  Light on and off red {leds} led for 3 times.
+ PURPOSE:
+     Check that red {leds} led is controlable
+ STEPS:
+     1.Press enter and observe led behavior
+ VERIFICATION:
+     Does the red {leds} led blinking?
+plugin: user-interact-verify
+user: root
+flags: also-after-suspend
+estimated_duration: 20.0
+command:
+ set -e
+ for i in $(seq 1 3); do
+    for y in 0 248; do
+       echo $y > /sys/class/leds/{leds}/brightness
+       test `cat /sys/class/leds/{leds}/brightness` == $y || exit 1
+       sleep 1
+    done
+ done
+ echo 0 > /sys/class/leds/{leds}/brightness
+
+id: imx6sx-leds
+plugin: resource
+imports: from com.canonical.certification import model_assertion
+requires: model_assertion.model == "hbt-at-pdk-x6med"
+_summary: Gather list of test led indicators for Honeywell imx6sx
+_description:
+ Honeywell imx6sx has 8 led indicators. Get a list of led so can divide
+ uptests.
+estimated_duration: 1s
+flags: preserve-locale
+command:
+  declare -A dict
+  dict=( ['green:dl3']="WIFI"
+         ['green:dl4']="LTE_PWR"
+         ['green:dl5']="PANEL"
+         ['green:dl6']="LED1"
+         ['green:dl7']="LED2"
+         ['green:dl8']="LED3"
+         ['blue:dl2']="Bluetooth"
+         ['yellow:dl1']="Trouble" )
+  CLASSES="green:dl3 green:dl4 green:dl5 green:dl6 
+           green:dl7 green:dl8 blue:dl2 yellow:dl1"
+  for c in $CLASSES; do
+    echo "leds: $c"
+    echo "leds_name: ${dict[$c]}"
+    INFO=$c
+    arrINFO=(${INFO//:/ })
+    echo "leds_color: ${arrINFO[0]}"
+    echo "leds_position: ${arrINFO[1]}"
+    echo
+  done
+
+unit: template
+template-resource: imx6sx-leds
+template-unit: job
+category_id: led-indicator
+id: led-indicator/imx6sx-led-indicators-{leds}
+estimated_duration: 10.0
+plugin: user-interact-verify
+user: root
+flags: also-after-suspend
+_summary: Check control of {leds_name} led indecator.
+_description:
+ PURPOSE:
+     Check that {leds_name} LED turns on and after 3 seconds, it turns off.
+ STEPS:
+     1. Press Enter and observe LED behavior on imx6sx board
+ VERIFICATION:
+     Does the "{leds_name}" LED with color "{leds_color}" on position "{leds_position}" turn on and then off?
+command:
+  echo 255 > /sys/class/leds/{leds}/brightness
+  sleep 3
+  echo 0 > /sys/class/leds/{leds}/brightness
+
+id: imx6glss-leds
+imports: from com.canonical.certification import model_assertion
+requires: model_assertion.model == "hbt-fire-network-glssnw"
+plugin: resource
+_summary: Gather list of test led indicators for Honeywell imx6glss
+_description:
+  Honeywell imx6glss has 7 led indicators. Get a list of led so they can be
+  devided in to test jobs.
+estimated_duration: 1s
+flags: preserve-locale
+command:
+  declare -A dict
+  dict=( ['bt-activity']="DL12:Blue"
+         ['wifi-error']="DL13:Yellow"
+         ['wifi-activity']="DL14:Green"
+         ['application-yellow']="DL15:Yellow"
+         ['application-green']="DL16:Green"
+         ['usb-type-c-error']="DL17:Yellow"
+         ['usb-type-c-link']="DL18:Green" )
+  CLASSES="bt-activity wifi-error wifi-activity application-yellow 
+           application-green usb-type-c-error usb-type-c-link"
+  for c in $CLASSES; do
+    INFO=${dict[$c]}
+    arrINFO=(${INFO//:/ })
+    echo "leds: $c"
+    echo "leds_position: ${arrINFO[0]}"
+    echo "leds_color: ${arrINFO[1]}"
+    echo
+  done
+
+unit: template
+template-resource: imx6glss-leds
+template-unit: job
+category_id: led-indicator
+id: led-indicator/imx6glss-led-indicators-{leds}
+estimated_duration: 10.0
+plugin: user-interact-verify
+user: root
+_summary: Check the control of {leds} LED indecator.
+_description:
+ PURPOSE:
+     Check that {leds} LED lights up and turns off after 3 seconds.
+ STEPS:
+     1.Press Enter and observe LED behavior on the GLSS board
+ VERIFICATION:
+     Does the "{leds}" LED with color "{leds_color}" on position "{leds_position}" turn on and then off?
+command:
+  echo 255 > /sys/class/leds/{leds}/brightness
+  sleep 3
+  echo 0 > /sys/class/leds/{leds}/brightness
