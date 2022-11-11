@@ -27,9 +27,9 @@ unit: test plan
 _name: ARM after suspend OTG manual tests
 _description: Manual after suspend OTG tests for ARM devices
 include:
-    after-suspend-manual-usb-otg/g_serial.*
-    after-suspend-manual-usb-otg/g_mass_storage.*
-    after-suspend-manual-usb-otg/g_ether.*
+    after-suspend-usb-otg/g_serial.*
+    after-suspend-usb-otg/g_mass_storage.*
+    after-suspend-usb-otg/g_ether.*
 
 id: after-suspend-arm-otg-automated
 unit: test plan

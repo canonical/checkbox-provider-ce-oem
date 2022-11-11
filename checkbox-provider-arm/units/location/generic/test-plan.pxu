@@ -29,7 +29,7 @@ _name: ARM after suspend gps manual tests
 _description: Manual after-suspend gps tests for ARM devices
 bootstrap_include:
 include:
-    after-suspend-manual-location/gps_coordinate 
+    after-suspend-location/gps_coordinate 
 
 id: after-suspend-arm-gps-automated
 unit: test plan

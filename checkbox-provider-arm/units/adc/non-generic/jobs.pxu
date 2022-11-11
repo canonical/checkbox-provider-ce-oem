@@ -1,5 +1,4 @@
-id: adc/imx6-internal-adc
-requires: honeywell_sku.short_name == 'i.mx6sx'
+id: adc/shiner-internal-adc
 _summary: Test ADC value is expected.
 _purpose:
  Check ADC value approximates to expected value.  

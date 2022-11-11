@@ -1,4 +1,4 @@
-id: imx/imx8-common_module_porta
+id: shiner/imx8-common_module_porta
 _summary: Test common module for imx8 pdk series.
 _purpose:
  Check common module can work well.
@@ -16,7 +16,7 @@ command:
     modprobe spidev
     imx8_common_module_test -d /dev/spidev2.0 -c /dev/ttySC2 -a0
 
-id: imx/imx6-common_module_port1
+id: shiner/imx6-common_module_port1
 _summary: Test common module prot1 for imx6 pdk series.
 _purpose:
  Check common module can work well.
@@ -36,7 +36,7 @@ command:
     echo 498 > /sys/class/gpio/export && echo out > /sys/class/gpio/gpio498/direction && echo 1 > /sys/class/gpio/gpio498/value
     imx6_common_module_test -d /dev/spidev0.0 -c /dev/ttymxc4 -a0
 
-id: imx/imx6-common_module_port2
+id: shiner/imx6-common_module_port2
 _summary: Test common module port 2 for imx6 pdk series.
 _purpose:
  Check common module can work well.

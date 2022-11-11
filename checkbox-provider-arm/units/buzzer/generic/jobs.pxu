@@ -1,12 +1,12 @@
-id: miscellanea/pwm-beeper
+id: buzzer/input-pcspkr
 plugin: user-interact-verify
-category_id: com.canonical.plainbox::miscellanea
+category_id: buzzer
 user: root
 estimated_duration: 5
-_summary: PWM Beeper test
-_purpose: Check the functionality of PWM Beeper
+_summary: Buzzer that probe as an input PC speaker test
+_purpose: Check the functionality of buzzer
 _steps:
- 1. Press enter and listen to the PWM Beeper
+ 1. Press enter and listen to the buzzer
 _verification:
  Do you hear the beep for one second?
 command:

@@ -34,8 +34,8 @@ bootstrap_include:
     gpio-button-mapping
     interrupts-button-mapping
 include:
-    after-suspend-manual-button/detect-by-gpio-press-.*
-    after-suspend-manual-button/detect-by-interrupts-press-.*
+    after-suspend-button/detect-by-gpio-press-.*
+    after-suspend-button/detect-by-interrupts-press-.*
 
 id: after-suspend-arm-button-automated
 unit: test plan

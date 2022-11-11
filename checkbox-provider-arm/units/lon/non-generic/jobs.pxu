@@ -1,4 +1,4 @@
-id: imx/lon-test-snap
+id: shiner/lon-test-snap
 _summary: Install test snap for LON device.
 _purpose:
  Install test snap for LON device.
@@ -18,7 +18,7 @@ command:
   exit 0
  fi
 
-id: imx/lon-jace9000
+id: shiner/lon-jace9000
 _summary: Check if LON device work on JACE9000.
 _purpose:
  Check if LON device work on JACE9000.
@@ -32,4 +32,4 @@ imports: from com.canonical.plainbox import manifest
 flag: also-after-suspend
 estimated_duration: 60
 command: lon_jace9000.sh
-after: imx/lon-test-snap
+after: shiner/lon-test-snap

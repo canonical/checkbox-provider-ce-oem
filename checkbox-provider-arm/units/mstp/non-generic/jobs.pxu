@@ -1,4 +1,4 @@
-id: imx/mstp-p6-p7
+id: shiner/mstp-p6-p7
 _summary: Run mstp test with p6 and p7
 _purpose:
  To test mstp can work between p6 and p7.

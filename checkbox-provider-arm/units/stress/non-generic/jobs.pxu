@@ -1,4 +1,4 @@
-id: imx-cold-boot-loop-reboot1
+id: shiner-cold-boot-loop-reboot1
 category_id: com.canonical.certification::stress-tests/cold-boot
 _summary: Perform cold reboot 1
 _description: This is a template that will be used to generate a stress test
@@ -14,7 +14,7 @@ flags: preserve-locale noreturn autorestart
 estimated_duration: 180.0
 depends: com.canonical.certification::init-boot-loop-data
 
-id: imx-cold-boot-loop-reboot{reboot_id}
+id: shiner-cold-boot-loop-reboot{reboot_id}
 category_id: com.canonical.certification::stress-tests/cold-boot
 _summary: Perform cold reboot {reboot_id}
 _description: This is a template that will be used to generate a stress test
@@ -31,10 +31,10 @@ command:
 user: root
 flags: preserve-locale noreturn autorestart
 estimated_duration: 180.0
-after: imx-cold-boot-loop-test{reboot_id_previous}
+after: shiner-cold-boot-loop-test{reboot_id_previous}
 depends: com.canonical.certification::init-boot-loop-data
 
-id: imx-cold-boot-loop-test1
+id: shiner-cold-boot-loop-test1
 category_id: com.canonical.certification::stress-tests/cold-boot
 _summary: Cold boot system configuration test 1
 _description: This is a template that will be used to generate a stress test
@@ -62,9 +62,9 @@ command:
 user: root
 flags: preserve-locale
 estimated_duration: 1.0
-depends: imx-cold-boot-loop-reboot1
+depends: shiner-cold-boot-loop-reboot1
 
-id: imx-cold-boot-loop-test{reboot_id}
+id: shiner-cold-boot-loop-test{reboot_id}
 category_id: com.canonical.certification::stress-tests/cold-boot
 _summary: Cold boot system configuration test {reboot_id}
 _description: This is a template that will be used to generate a stress test
@@ -94,7 +94,7 @@ command:
 user: root
 flags: preserve-locale
 estimated_duration: 1.0
-depends: imx-cold-boot-loop-reboot{reboot_id}
+depends: shiner-cold-boot-loop-reboot{reboot_id}
 
 unit: template
 template-resource: com.canonical.certification::stress_s3_iterations
@@ -103,7 +103,7 @@ template-engine: jinja2
 plugin: shell
 flags: preserve-locale
 category_id: com.canonical.certification::stress-tests/suspend
-id: stress-tests/imx-suspend_{{ s3_iterations }}_cycles
+id: stress-tests/shiner-suspend_{{ s3_iterations }}_cycles
 imports:
   from com.canonical.certification import sleep
   from com.canonical.certification import rtc

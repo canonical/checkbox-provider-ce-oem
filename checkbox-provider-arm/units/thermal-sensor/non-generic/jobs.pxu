@@ -1,5 +1,5 @@
-id: sensor/imx-thermal-external
-_summary: Check IMX External Thermal Sensor
+id: sensor/shiner-thermal-external
+_summary: Check Shiner External Thermal Sensor
 plugin: shell
 user: root
 command:

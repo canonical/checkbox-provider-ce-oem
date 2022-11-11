@@ -1,4 +1,4 @@
-id: gpu/qt-based-demo
+id: imx-gpu/qt-based-demo
 _summary: Check if qt based demo can display by using GPU.
 plugin: manual
 category_id: gpu
@@ -25,7 +25,7 @@ _steps:
 _verification:
     Does screen display as expected?
 
-id: gpu/unit-test-2d-3d-arrays
+id: imx-gpu/unit-test-2d-3d-arrays
 _summary: GPU unit test of multi dimensional arrays.
 plugin: shell
 category_id: gpu

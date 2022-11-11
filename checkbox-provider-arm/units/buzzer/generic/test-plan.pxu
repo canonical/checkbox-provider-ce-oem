@@ -17,7 +17,7 @@ bootstrap_include:
     gpio-buzzer-mapping
     pwm-buzzer-mapping
 include:
-    miscellanea/pwm-beeper
+    buzzer/input-pcspkr
     buzzer/sound-test-.*
 
 id: arm-buzzer-automated
@@ -34,8 +34,8 @@ bootstrap_include:
     gpio-buzzer-mapping
     pwm-buzzer-mapping
 include:
-    after-suspend-manual-miscellanea/pwm-beeper
-    after-suspend-manual-buzzer/sound-test-.*
+    after-suspend-buzzer/input-pcspkr
+    after-suspend-buzzer/sound-test-.*
 
 id: after-suspend-arm-buzzer-automated
 unit: test plan

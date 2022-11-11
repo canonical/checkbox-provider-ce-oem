@@ -1,16 +1,8 @@
-plugin: shell
-category_id: com.canonical.plainbox::miscellanea
-estimated_duration: 0.5
-unit: template
-template-resource: com.canonical.certification::model_assertion
-imports: from com.canonical.certification import executable
-template-unit: job
-requires:
- executable.name == 'dumpimage' or executable.name == 'mokutil'
-id: miscellanea/honeywell-secure_boot_mode_{gadget}
-_summary: Test that {gadget} Ubuntu Core system booted with Secure Boot active
-_description:
- Test to verify that the system booted with Secure Boot active.
-user:root
+id: gadget_name
+_summary: Get the name of gadget snap.
+_purpose:
+ Get the name of gadget snap.
+plugin: resource
+estimated_duration: 1
 command:
- boot_mode_test_snappy.py {gadget} {kernel}
+ python3 -c 'from checkbox_support.snap_utils.system import get_gadget_snap ; print("gadget_snap: {}".format(get_gadget_snap()))'

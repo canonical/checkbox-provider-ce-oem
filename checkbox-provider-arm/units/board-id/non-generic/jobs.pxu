@@ -1,5 +1,5 @@
-id: imx/imx6-board-id
-_summary: Test board ID for imx6 pdk series.
+id: shiner/board-id
+_summary: Test board ID for shiner series.
 _purpose:
  Check board ID can be read out.
 plugin: shell

@@ -1,7 +1,7 @@
 id: arm-mtd-full
 unit: test plan
 _name: ARM Memory Technology Device tests
-_description: Full Memory Technology Device tests for iMX devices
+_description: Full Memory Technology Device tests for ARM devices
 include:
 nested_part:
     arm-mtd-manual

@@ -1,8 +1,0 @@
-id: imx-miscellaneous
-unit: test plan
-_name: i.MX miscellaneous tests
-_description: Miscellaneous tests for Honeywell i.MX devices
-bootstrap_include:
-    com.canonical.certification::model_assertion
-include:
-    miscellanea/honeywell-secure_boot_mode_.*

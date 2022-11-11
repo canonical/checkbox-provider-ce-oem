@@ -1,6 +1,6 @@
-id: honeywell_sku
+id: shiner_sku
 plugin: resource
-_summary: Detect which Honeywell SKU the tool is running on
+_summary: Detect which Shiner SKU the tool is running on
 command:
  perl -ne 's/ /-/g;s/(.*?)([A-Z]?)\W+$/\L$1\U$2/; print "name: $_\n"' /proc/device-tree/model
  perl -ne 's/.*?\s(\S+).*/$1/i; print "short_name: \L$_\n\n"' /proc/device-tree/model

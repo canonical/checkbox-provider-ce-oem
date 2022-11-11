@@ -1,4 +1,4 @@
-id: eeprom/imx6-eeprom 
+id: shiner/imx6-eeprom 
 _summary: Test EEPROM read and write for imx6 
 _purpose:
  Check EEPROM can write data into it, and read it back correctly. 
@@ -29,7 +29,7 @@ command:
     exit 1
   fi
 
-id: eeprom/imx8-eeprom
+id: shiner/imx8-eeprom
 _summary: Test EEPROM read and write for imx8
 _purpose:
  Check EEPROM can write data into it, and read it back correctly.
