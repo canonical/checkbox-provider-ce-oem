@@ -37,6 +37,7 @@ nested_part:
     arm-audio-manual
     arm-otg-manual
     arm-rtc-manual
+    arm-rs485-manual
 
 id: arm-automated
 unit: test plan
@@ -59,6 +60,7 @@ nested_part:
     arm-audio-automated
     arm-otg-automated
     arm-rtc-automated
+    arm-rs485-automated
 
 id: after-suspend-arm-manual
 unit: test plan
@@ -80,6 +82,7 @@ nested_part:
     after-suspend-arm-audio-manual
     after-suspend-arm-otg-manual
     after-suspend-arm-rtc-manual
+    after-suspend-arm-rs485-manual
 
 id: after-suspend-arm-automated
 unit: test plan
@@ -100,3 +103,4 @@ nested_part:
     after-suspend-arm-audio-automated
     after-suspend-arm-otg-automated
     after-suspend-arm-rtc-automated
+    after-suspend-arm-rs485-automated
