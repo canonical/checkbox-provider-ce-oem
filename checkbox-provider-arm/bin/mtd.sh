@@ -1,48 +1,76 @@
 #!/bin/bash
-MTD_PATH="/sys/class/mtd/"
+set -e
 MTDS=$(ls /dev/mtd[0-9] | awk -F "/" '{print $3}')
+
 listAllMtd() {
     for c in ${MTDS}; do
         echo "MTD_NAME: ${c}"
-        awk -F "=" '/OF_NAME/ { if ($2 == "mram" || $2 == "fram") print "MTD_TYPE: "$2; else print "MTD_TYPE: norflash" }' "${MTD_PATH}""${c}"/uevent
         echo ""
     done
 }
 
-countAllMtd() {
-    #$1: type of MTD $2: total number of MTD
-    fram=0
-    mram=0
-    norflash=0
-    for c in $MTDS; do
-        type=$(awk -F "=" '/OF_NAME/ { print $2 }' "${MTD_PATH}""${c}"/uevent)
-        case ${type} in
-                mram) mram=$((mram+1)) ;;
-                fram) fram=$((fram+1)) ;;
-                *) norflash=$((norflash+1))
-        esac
-    done
-    if [ $((${1})) == "${2}" ]; then
-        echo "Number of ""${1}"" are correct!"
+countMtd() {
+    count=$( listAllMtd | grep "MTD_NAME" | wc -l)
+    if [ "${1}" == "$count" ]; then
+        echo "The number of MTD is correct!"
     else
-        echo "Number of ""${1}"" are incorrect!"
+        echo "The number of MTD is incorrect!"
         exit 1 
     fi
 }
 
-listTotalNum() {
-    #List from checkbox config ${TOTAL_MTD_NUM}
-    for i in ${1}; do
-        awk -F ":" '{print "TYPE: "$1 "\nNUM: "$2}' <<< "${i}"
-        echo ""
-    done
+# This function will get the size of MTD.
+# size_hex is the MTD size convert to HEX, and it's for read and write the file to MTD.
+# size=$(awk '/mtd.size/ {print $3}' <<< "$info")
+# size_hex=$(printf '%x' "$size")
+infoMtd() {
+    info=$(mtd_debug info /dev/"$1")
+    echo "##### MTD info #####"
+    echo "$info"
+    size=$(awk '/mtd.size/ {print $3}' <<< "$info")
+    size_hex=$(printf '%x' "$size")
+}
+
+createTestFile() {
+    echo "##### Create test file #####"
+    dd if=/dev/urandom of="$writeFile" bs=1 count="$1"
+}
+
+eraseMtd() {
+    echo "##### Erase MTD #####"
+    mtd_debug erase /dev/"$1" 0x0 0x"$2"
+}
+
+writeMtd() {
+    echo "##### Write MTD #####"
+    mtd_debug write /dev/"$1" 0x0 0x"$2" "$writeFile"
+}
+
+readMtd() {
+    echo "##### Read MTD #####"
+    mtd_debug read /dev/"$1" 0x0 0x"$2" "$readFile"
+}
+
+compareFile() {
+    echo "##### Compare File #####"
+    diff "$writeFile" "$readFile" && echo "$1 read and write file are consistency!" || (echo "$1 read and write file are inconsistency!!" ; exit 1)
 }
 
 main(){
+# $1 is action in list/compare/count
+# $2 is MTD device name. e.g. mtd0, mtd1 ...etc
     case ${1} in
         list) listAllMtd ;;
-        total) listTotalNum "${2}" ;;
-        count) countAllMtd "${2}" "${3}" ;;
+        compare) 
+            writeFile=$(mktemp)
+            readFile=$(mktemp)
+            infoMtd "${2}"
+            createTestFile "$size"
+            eraseMtd "${2}" "$size_hex"
+            writeMtd "${2}" "$size_hex"
+            readMtd "${2}" "$size_hex"
+            compareFile "${2}" ;;
+        count) countMtd "${2}";;
         *) echo "Need given parameter."
     esac
 }
