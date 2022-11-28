@@ -47,6 +47,7 @@ _description:
 estimated_duration: 120
 include:
 nested_part:
+    arm-dtb-automated
     arm-cpu-automated
     arm-button-automated
     arm-ptp-automated
