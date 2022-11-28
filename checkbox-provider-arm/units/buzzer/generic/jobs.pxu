@@ -8,9 +8,9 @@ _purpose: Check the functionality of buzzer
 _steps:
  1. Press enter and listen to the buzzer
 _verification:
- Do you hear the beep for one second?
+    Do you hear the beep sound?
 command:
- beep_1sec
+    beep "$BEEP_PATH"
 flags: also-after-suspend
 
 id: gpio-buzzer-mapping
