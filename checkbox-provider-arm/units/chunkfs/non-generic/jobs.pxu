@@ -1,4 +1,4 @@
-id: shiner/chunkfs-test-snap
+id: imx/chunkfs-test-snap
 _summary: Install test snap for chunkfs.
 _purpose:
  Install test snap for chunkfs.
@@ -18,27 +18,29 @@ command:
     exit 0
   fi
 
-id: shiner/chunkfs-test-snap-connect-plugs
+unit: template
+template-resource: gadget_name
+template-engine: jinja2
+template-unit: job
+id: imx/chunkfs-connect-plugs-{{ gadget_snap }}
+category_id: chunkfs
 _summary: Connect plugs and slot for chunkfs test snap
-_purpose:
- Connect plugs and slot for chunkfs test snap.
+_description:
+  Connect plugs and slot for chunkfs test snap.
 plugin: shell
 user: root
-category_id: chunkfs
-estimated_duration: 30
-after: shiner/chunkfs-test-snap
-command:
-  set -e
-  snap connect tridium-chunkfs-test:custom-device tridium-atlas-gadget:fram-devices
+estimated_duration: 20.0
+command: 
+  snap connect tridium-chunkfs-test:custom-device {{ gadget_snap }}:fram-devices
   snap connect tridium-chunkfs-test:kernel-module-control
   snap connect tridium-chunkfs-test:config-sys
   snap connect tridium-chunkfs-test:log-observe
-  #snap connect tridium-chunkfs-test:hardware-observe
+depends: imx/chunkfs-test-snap
 
-id: shiner/chunkfs-jace9000
-_summary: Check if chunkfs work on JACE9000.
+id: imx/chunkfs-test
+_summary: Check if chunkfs work
 _purpose:
-  Check if chunkfs work on JACE9000.
+  Check if chunkfs work
 _description:
   Please refer to https://bugs.launchpad.net/shiner/+bug/1967050/comments/55 if needed.
 plugin: shell
@@ -49,4 +51,3 @@ estimated_duration: 60
 command: 
   tridium-chunkfs-test.chunkfs-testscript numrecs 4261 2>&1 | tee /tmp/chunkfs.log
   if grep -qE "errno|failed" /tmp/chunkfs.log; then exit 1; fi
-after: shiner/chunkfs-test-snap-connect-plugs
