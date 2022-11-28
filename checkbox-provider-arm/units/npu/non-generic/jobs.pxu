@@ -1,16 +1,41 @@
-id: npu/neural-network-tensorflow
-_summary: Test neural network by using tensorflow on NPU.
-plugin: user-interact-verify
+id: npu/install-tensorflow-snap
+_summary: Install tensorflow test snap for global store
+plugin: shell
 category_id: npu
 estimated_duration: 30
-flags: also-after-suspend
-_purpose: To see if neural network can run by using tensorflow on NPU.
 user: root
-_verification:
-   Does result run without any error or lack library? And also the average time need less then 40 ms. 
-command: 
-   label_image -m $PLAINBOX_PROVIDER_DATA/tensorflow/mobilenet_v1_1.0_224_quant.tflite -i $PLAINBOX_PROVIDER_DATA/tensorflow/grace_hopper.bmp -l $PLAINBOX_PROVIDER_DATA/tensorflow/labels.txt -a 1 |& tee /tmp/neural_network.log
-   if grep -q "unable to open library" /tmp/neural_network.log; then
-      echo "ERROR: Cannot find needed library"
+command:
+   set -Eeuo pipefail
+   echo -e '\nChecking needed snap "itrue-tensorflow-imx8"...'
+   snap list |grep -q 'itrue-tensorflow-imx8'
+   if [ $? = "1" ]; then
+      echo -e '\nDownloading snap "itrue-tensorflow-imx8"'
+      snap download itrue-tensorflow-imx8
+      echo -e '\nInstalling snap "itrue-tensorflow-imx8"'
+      snap install itrue-tensorflow-imx8_*.snap --devmode
+   else
+      echo -e '\nSnap been installed'
+   fi
+
+id: npu/neural-network-tensorflow
+_summary: Test neural network by using tensorflow on NPU.
+plugin: shell
+category_id: npu
+estimated_duration: 30
+_purpose: To see if neural network can run by using tensorflow on NPU and
+ the average time is not more then 5 ms.
+user: root
+depends: npu/install-tensorflow-snap
+command:
+   set -Eeuo pipefail
+   file=$(mktemp)
+   itrue-tensorflow-imx8.label-image \
+   -m /snap/itrue-tensorflow-imx8/current/usr/share/models/mobilenet_v1_1.0_224_quant.tflite \
+   -i /snap/itrue-tensorflow-imx8/current/usr/share/tflite-examples/grace_hopper.bmp \
+   -l /snap/itrue-tensorflow-imx8/current/usr/share/tflite-examples/labels.txt \
+   -a 1 |& tee "$file"
+   time=$(awk '/average\ time/ {print $4}' < "$file" | awk -F"." '{print $1}' )
+   if [ "$time" -ge 5 ]; then
+      echo "ERROR: average time is too slow"
       exit 1
    fi
