@@ -12,6 +12,8 @@ _verification:
 command:
     beep "$BEEP_PATH"
 flags: also-after-suspend
+imports: from com.canonical.plainbox import manifest
+requires: manifest.has_buzzer == 'True'
 
 id: gpio-buzzer-mapping
 _summary: Generates a GPIO and buzzer mappings for further buzzer test
@@ -44,6 +46,8 @@ category_id: buzzer
 estimated_duration: 40s
 flags: also-after-suspend
 command: buzzer_test.sh -n {name} -p {port} -e {enable_value} -t gpio
+imports: from com.canonical.plainbox import manifest
+requires: manifest.has_buzzer == 'True'
 
 id: pwm-buzzer-mapping
 _summary: Generates a PWM and buzzer mappings for further buzzer test
@@ -76,3 +80,5 @@ category_id: buzzer
 estimated_duration: 40s
 flags: also-after-suspend
 command: buzzer_test.sh -n {name} -c {chip} -p {port} -e {enable_value} -t pwm
+imports: from com.canonical.plainbox import manifest
+requires: manifest.has_buzzer == 'True'

@@ -29,6 +29,8 @@ command:
             fi
         fi
     done
+imports: from com.canonical.plainbox import manifest
+requires: manifest.has_ptp == 'True'
 
 unit: template
 template-resource: ptp/ptp-devices

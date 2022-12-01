@@ -29,6 +29,8 @@ category_id: button
 estimated_duration: 25s
 flags: also-after-suspend
 command: button_test.sh -t gpio -n {name} -p {port}
+imports: from com.canonical.plainbox import manifest
+requires: manifest.has_button == 'True'
 
 id: interrupts-button-mapping
 _summary: Generates a interrupts and button mappings for further button test
@@ -59,3 +61,5 @@ category_id: button
 estimated_duration: 25s
 flags: also-after-suspend
 command: button_test.sh -t interrupts -n {name}
+imports: from com.canonical.plainbox import manifest
+requires: manifest.has_button == 'True'

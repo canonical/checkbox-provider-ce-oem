@@ -26,13 +26,13 @@ _description:
 estimated_duration: 3600
 include:
 nested_part:
+    arm-installation-info-manual
     arm-cpu-manual
     arm-button-manual
     arm-ptp-manual
     arm-sensor-manual
     arm-gps-manual
     arm-mtd-manual
-    arm-installation-info-manual
     arm-buzzer-manual
     arm-audio-manual
     arm-otg-manual
@@ -47,6 +47,7 @@ _description:
 estimated_duration: 120
 include:
 nested_part:
+    arm-installation-info-automated
     arm-dtb-automated
     arm-cpu-automated
     arm-button-automated

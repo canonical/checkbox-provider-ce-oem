@@ -5,6 +5,7 @@ _description:
 plugin: shell
 user: root
 estimated_duration: 1.0
+category_id: com.canonical.certification::rtc_category
 command:
     if [ -z $TOTAL_RTC_NUM ]; then 
         TOTAL_RTC_NUM=1; 
@@ -29,6 +30,7 @@ _description:
 plugin: resource
 user: root
 estimated_duration: 1.0
+category_id: com.canonical.certification::rtc_category
 command:
     rtcs=$(ls /dev/rtc[0-9] | awk -F "/" '{print $3}')
     for c in ${rtcs}; do

@@ -6,3 +6,5 @@ user: root
 estimated_duration: 1.0
 flags: also-after-suspend
 command: location.sh
+imports: from com.canonical.plainbox import manifest
+requires: manifest.has_gps == 'True'

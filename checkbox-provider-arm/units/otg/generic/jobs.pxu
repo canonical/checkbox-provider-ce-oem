@@ -28,6 +28,8 @@ _steps:
 _verification:
     Does string send and receive worked?
 flags: preserve-locale also-after-suspend
+imports: from com.canonical.plainbox import manifest
+requires: manifest.has_otg == 'True'
 
 id: usb-otg/g_serial-cleanup
 _summary: Cleanup USB OTG serial interface setup after serial device test
@@ -65,6 +67,8 @@ user: root
 category_id: com.canonical.plainbox::usb
 estimated_duration: 5m
 flags: preserve-locale also-after-suspend
+imports: from com.canonical.plainbox import manifest
+requires: manifest.has_otg == 'True'
 
 id: usb-otg/g_mass_storage-cleanup
 _summary: Cleanup mass storage setup after mass storage device test
@@ -114,6 +118,8 @@ user: root
 category_id: com.canonical.plainbox::usb
 estimated_duration: 5m
 flags: preserve-locale also-after-suspend
+imports: from com.canonical.plainbox import manifest
+requires: manifest.has_otg == 'True'
 
 id: usb-otg/g_ether-cleanup
 _summary: Cleanup USB OTG ethernet interface setup after ethernet device test
