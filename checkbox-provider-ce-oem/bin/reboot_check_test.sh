@@ -15,12 +15,13 @@ service_check() {
 }
 
 dump() {
-    echo "## Dump the devices.."
+    echo "## Dump the devices information to $output_dir.."
     mkdir -p "$output_dir"
     lspci -i "$SNAP"/usr/share/misc/pci.ids > "$output_dir"/lspci_log
     iw dev | grep "Interface\|addr\|ssid" > "$output_dir"/wifi_conn
     checkbox-support-lsusb -f "$CHECKBOX_RUNTIME"/var/lib/usbutils/usb.ids -s | sort > "$output_dir"/lsusb_log
     echo "dump devices complete"
+    sync
 }
 
 compare() {

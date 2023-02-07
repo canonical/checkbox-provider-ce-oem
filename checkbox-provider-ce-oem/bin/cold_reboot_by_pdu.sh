@@ -70,6 +70,10 @@ main() {
 
     if [ "$pdu_type" == "apc" ]; then
         cold_reboot_apc
+    else
+        echo -e "Error: Network PDU type is not supported!\n"
+        help_function
+        exit 1
     fi
 }
 
@@ -91,8 +95,8 @@ while getopts "t:p:d:" opt; do
     esac
 done
 
-if  [[ "$pdu_type" != "apc" ]]; then
-    echo -e "Error: Network PDU type is not supported!\n"
+if  [ -z "$pdu_type" ]; then
+    echo -e "Error: Network PDU variable is needed!\n"
     help_function
     exit 1
 fi
