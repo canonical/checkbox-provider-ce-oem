@@ -59,8 +59,8 @@ cold_reboot_apc() {
 
 
 main() {
-    ip=$(echo $pdu_var | awk -F ':' '{print $1}')
-    outlet_port=$(echo $pdu_var | awk -F ':' '{print $2}')
+    ip=$(echo "$pdu_var" | awk -F ':' '{print $1}')
+    outlet_port=$(echo "$pdu_var" | awk -F ':' '{print $2}')
 
     if [[ -z "$ip" || -z "$outlet_port" ]]; then
         echo -e "Error: PDU variable format is unexpected!\n"
