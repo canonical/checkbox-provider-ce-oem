@@ -1,114 +1,114 @@
 # Copyright 2022 Canonical Ltd.
 # All rights reserved.
 #
-# Test plans and (optionally) jobs unique to the Ubuntu Core ARM devices.
+# Test plans and (optionally) jobs unique to the Ubuntu Core and Classic devices.
 #
 
-id: arm-full
+id: ce-oem-full
 unit: test plan
-_name: ARM - Full manual + automated tests for Ubuntu Core
+_name: CE-OEM - Full manual + automated tests for Ubuntu Core and Classic
 _description:
- Combined manual and automated test plans for Ubuntu Core ARM devices.
+ Combined manual and automated test plans for Ubuntu Core and Classic devices.
 include:
 nested_part:
-    arm-manual
-    arm-automated
-    after-suspend-arm-manual
-    after-suspend-arm-automated
+    ce-oem-manual
+    ce-oem-automated
+    after-suspend-ce-oem-manual
+    after-suspend-ce-oem-automated
 
-id: arm-manual
+id: ce-oem-manual
 unit: test plan
-_name: ARM - Manual only QA tests for Ubuntu Core
+_name: CE-OEM - Manual only QA tests for Ubuntu Core and Classic
 _description:
- Ubuntu Core QA test plan for the ARM hardware. This test plan contains
+ Ubuntu Core and Classic QA test plan for the hardware. This test plan contains
  all of the tests that require manual control of device hardware
  or some other user input to complete.
 estimated_duration: 3600
 include:
 nested_part:
-    arm-installation-info-manual
-    arm-cpu-manual
-    arm-button-manual
-    arm-ptp-manual
-    arm-sensor-manual
-    arm-gps-manual
-    arm-mtd-manual
-    arm-buzzer-manual
-    arm-audio-manual
-    arm-otg-manual
-    arm-rtc-manual
-    arm-rs485-manual
-    eeprom-manual
-    led-manual
+    ce-oem-installation-info-manual
+    ce-oem-cpu-manual
+    ce-oem-button-manual
+    ce-oem-ptp-manual
+    ce-oem-sensor-manual
+    ce-oem-gps-manual
+    ce-oem-mtd-manual
+    ce-oem-buzzer-manual
+    ce-oem-audio-manual
+    ce-oem-otg-manual
+    ce-oem-rtc-manual
+    ce-oem-rs485-manual
+    ce-oem-eeprom-manual
+    ce-oem-led-manual
 
-id: arm-automated
+id: ce-oem-automated
 unit: test plan
-_name: ARM - Automated only QA tests for Ubuntu Core
+_name: CE-OEM - Automated only QA tests for Ubuntu Core and Classic
 _description:
- Ubuntu Core QA test plan for the ARM hardware. This test plan contains
- all of the automated tests used to validate the ARM device.
+ Ubuntu Core and Classic QA test plan for the hardware. This test plan contains
+ all of the automated tests used to validate the device.
 estimated_duration: 120
 include:
 nested_part:
-    arm-installation-info-automated
-    arm-dtb-automated
-    arm-cpu-automated
-    arm-button-automated
-    arm-ptp-automated
-    arm-sensor-automated
-    arm-gps-automated
-    arm-mtd-automated
-    arm-buzzer-automated
-    arm-audio-automated
-    arm-otg-automated
-    arm-rtc-automated
-    arm-rs485-automated
-    eeprom-automated
-    led-automated
+    ce-oem-installation-info-automated
+    ce-oem-dtb-automated
+    ce-oem-cpu-automated
+    ce-oem-button-automated
+    ce-oem-ptp-automated
+    ce-oem-sensor-automated
+    ce-oem-gps-automated
+    ce-oem-mtd-automated
+    ce-oem-buzzer-automated
+    ce-oem-audio-automated
+    ce-oem-otg-automated
+    ce-oem-rtc-automated
+    ce-oem-rs485-automated
+    ce-oem-eeprom-automated
+    ce-oem-led-automated
 
-id: after-suspend-arm-manual
+id: after-suspend-ce-oem-manual
 unit: test plan
-_name: ARM - Manual only QA tests for Ubuntu Core
+_name: CE-OEM - Manual only QA tests for Ubuntu Core and Classic
 _description:
- Ubuntu Core QA test plan for the ARM hardware. This test plan contains
+ Ubuntu Core and Classic QA test plan for the hardware. This test plan contains
  all of the tests that require manual control of device hardware
  or some other user input to complete.
 estimated_duration: 3600
 include:
 nested_part:
-    after-suspend-arm-cpu-manual
-    after-suspend-arm-button-manual
-    after-suspend-arm-ptp-manual
-    after-suspend-arm-sensor-manual
-    after-suspend-arm-gps-manual
-    after-suspend-arm-mtd-manual
-    after-suspend-arm-buzzer-manual
-    after-suspend-arm-audio-manual
-    after-suspend-arm-otg-manual
-    after-suspend-arm-rtc-manual
-    after-suspend-arm-rs485-manual
-    after-suspend-eeprom-manual
-    after-suspend-led-manual
+    after-suspend-ce-oem-cpu-manual
+    after-suspend-ce-oem-button-manual
+    after-suspend-ce-oem-ptp-manual
+    after-suspend-ce-oem-sensor-manual
+    after-suspend-ce-oem-gps-manual
+    after-suspend-ce-oem-mtd-manual
+    after-suspend-ce-oem-buzzer-manual
+    after-suspend-ce-oem-audio-manual
+    after-suspend-ce-oem-otg-manual
+    after-suspend-ce-oem-rtc-manual
+    after-suspend-ce-oem-rs485-manual
+    after-suspend-ce-oem-eeprom-manual
+    after-suspend-ce-oem-led-manual
 
-id: after-suspend-arm-automated
+id: after-suspend-ce-oem-automated
 unit: test plan
-_name: ARM - Automated only QA tests for Ubuntu Core
+_name: CE-OEM - Automated only QA tests for Ubuntu Core and Classic
 _description:
- Ubuntu Core QA test plan for the ARM hardware. This test plan contains
- all of the automated tests used to validate the ARM device.
+ Ubuntu Core and Classic QA test plan for the hardware. This test plan contains
+ all of the automated tests used to validate the device.
 estimated_duration: 120
 include:
 nested_part:
-    after-suspend-arm-cpu-automated
-    after-suspend-arm-button-automated
-    after-suspend-arm-ptp-automated
-    after-suspend-arm-sensor-automated
-    after-suspend-arm-gps-automated
-    after-suspend-arm-mtd-automated
-    after-suspend-arm-buzzer-automated
-    after-suspend-arm-audio-automated
-    after-suspend-arm-otg-automated
-    after-suspend-arm-rtc-automated
-    after-suspend-arm-rs485-automated
-    after-suspend-eeprom-automated
-    after-suspend-led-automated
+    after-suspend-ce-oem-cpu-automated
+    after-suspend-ce-oem-button-automated
+    after-suspend-ce-oem-ptp-automated
+    after-suspend-ce-oem-sensor-automated
+    after-suspend-ce-oem-gps-automated
+    after-suspend-ce-oem-mtd-automated
+    after-suspend-ce-oem-buzzer-automated
+    after-suspend-ce-oem-audio-automated
+    after-suspend-ce-oem-otg-automated
+    after-suspend-ce-oem-rtc-automated
+    after-suspend-ce-oem-rs485-automated
+    after-suspend-ce-oem-eeprom-automated
+    after-suspend-ce-oem-led-automated
