@@ -65,6 +65,7 @@ nested_part:
     ce-oem-rs485-automated
     ce-oem-eeprom-automated
     ce-oem-led-automated
+    ce-oem-power-automated-by-pdu
 
 id: after-suspend-ce-oem-manual
 unit: test plan
@@ -112,3 +113,13 @@ nested_part:
     after-suspend-ce-oem-rs485-automated
     after-suspend-ce-oem-eeprom-automated
     after-suspend-ce-oem-led-automated
+
+id: ce-oem-stress
+unit: test plan
+_name: CE-OEM - stress only QA tests for Ubuntu Core and Classic
+_description:
+    Ubuntu Core and Classic QA test plan that includes all stress tests required for devices
+estimated_duration: 3600
+include:
+nested_part:
+    ce-oem-cold-boot-stress-test-by-pdu

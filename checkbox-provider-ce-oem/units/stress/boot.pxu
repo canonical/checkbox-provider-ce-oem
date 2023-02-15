@@ -1,4 +1,3 @@
-
 id: ce-oem-init-boot-loop-data
 category_id: com.canonical.certification::stress-tests
 _summary: Generate the baseline data set to test against
