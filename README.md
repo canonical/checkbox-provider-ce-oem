@@ -9,13 +9,13 @@ You can define specific plugs to connect to it and start using the test jobs and
 ```
 # Install the generic checkbox content provider based on Ubuntu 22.04
 $ sudo snap install checkbox22
-$ sudo snap install checkbox-ce-oem
+$ sudo snap install checkbox-ce-oem --channel=22.04/edge --classic
 ```
 
 ### On Ubuntu Core environment
 ```
 $ sudo snap install checkbox22
-$ sudo snap install checkbox-ce-oem
+$ sudo snap install checkbox-ce-oem --channel=latest/stable --devmode
 $ sudo snap connect checkbox-ce-oem:checkbox-runtime checkbox22:checkbox-runtime
 $ sudo snap connect checkbox-ce-oem:provider-certification-client checkbox22:provider-certification-client
 $ sudo snap connect checkbox-ce-oem:provider-checkbox checkbox22:provider-checkbox
