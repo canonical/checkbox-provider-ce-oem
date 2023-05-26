@@ -1,13 +1,3 @@
-id: cryptoinfo
-estimated_duration: 0.37
-plugin: resource
-user: root
-command: cat /proc/crypto
-requires: manifest.has_caam == 'True'
-imports: from com.canonical.plainbox import manifest
-_summary: Collect information about the crypto algorithm in system
-_description: Gets crypto algorithm resource info from /proc/crypto
-
 id: ce-oem-crypto/caam/rng-available
 _summary: Check if rng-caam is avaliable.
 plugin: shell
@@ -15,8 +5,8 @@ user: root
 category_id: caam
 flags: also-after-suspend
 estimated_duration: 1
-requires: manifest.has_caam == 'True'
-imports: from com.canonical.plainbox import manifest
+requires: 'rng-caam' in hwrng.HWRNG_Current
+imports: from com.canonical.qa.ceoem import hwrng
 command:
     hwrng_path="/sys/class/misc/hw_random/rng_current"
     echo "Hardware RNG currently using in system is: "$(cat $hwrng_path)""
