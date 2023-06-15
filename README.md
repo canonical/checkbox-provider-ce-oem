@@ -1,5 +1,5 @@
 # checkbox-provider-ce-oem
-This is a checkbox provider for both IoT and PC devices. And it will be built as SNAP named *checkbox-ce-oem*. 
+This is a checkbox provider for both IoT and PC devices. And it will be built as SNAP named *checkbox-ce-oem*.
 You can define specific plugs to connect to it and start using the test jobs and plans included in checkbox-provider-ce-oem.
 
 # Use it as checkbox launcher
@@ -25,7 +25,7 @@ $ sudo snap connect checkbox-ce-oem:provider-tpm2 checkbox22:provider-tpm2
 
 ## Modify the checkbox configuration to fit your test environment
 ```
-# shows the checkbox configuration
+# show the checkbox configuration
 $ sudo checkbox-ce-oem.configure -l
 ALSADEVICE=hw:CARD=bytrt5660,DEV=0
 MODEL_GRADE=signed
@@ -114,9 +114,9 @@ $ checkbox{interface snap}.shell> lsmtd
 Some of the jobs that in provider-ce-oem requires addtional variables define in checkbox config. Please refer to following:
 
 ```
-id: ce-oem-gpio-leds 
+id: ce-oem-gpio-leds
 GPIO_LEDS={name1}:{port1} {name2}:{port2} ...
-e.g. GPIO_LEDS=dl1:488 dl2:489 dl44:507 
+e.g. GPIO_LEDS=dl1:488 dl2:489 dl44:507
 
 id: ce-oem-sysfs-leds
 SYS_LEDS={path1}:{position1} {path2}:{position1} ...
@@ -155,4 +155,4 @@ e.g. TOTAL_RTC_NUM=2
 id: ce-oem-serial/rs485-list
 RS485_PORTS={port1} {port2}
 e.g. RS485_PORTS=/dev/ttymxc1 /dev/ttymxc2
-``` 
+```
