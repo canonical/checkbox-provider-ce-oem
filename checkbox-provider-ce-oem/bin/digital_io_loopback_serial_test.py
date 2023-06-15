@@ -20,7 +20,7 @@ def calculate_crc(*data):
 
 class DigitalIOSerialController():
 
-    TEST_STATES = [0, 1]
+    TEST_STATES = (0, 1)
     # DIGITAL_IN_PINS = [6, 7, 8, 9]
     # DIGITAL_OUT_PINS = [2, 3, 4, 5]
     PREFIX_BYTE = 68 # equal to 0x44
@@ -63,7 +63,7 @@ class DigitalIOSerialController():
         return value
 
     def write_digital_out(self, pin_num, value):
-        """Write th e value to digital output port
+        """Write the value to digital output port
         Will issue a command to serial console with following format
         {function_byte} {pin_byte} {value} {crc_sum}
 
@@ -91,7 +91,10 @@ class DigitalIOSerialController():
         Raises:
             SystemExit: Exit the function with the test result
         """
-        print(f"# Digital I/O loopback test. out:{out_port}, in:{in_port}")
+        print(
+            "# Digital I/O loopback test. out:{}, in:{}".format(
+                out_port, in_port)
+        )
         raise SystemExit(not self.loopback_test(out_port, in_port))
 
     def loopback_test(self, out_port, in_port):

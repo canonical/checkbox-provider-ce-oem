@@ -1,13 +1,3 @@
-id: digital-io-full
-unit: test plan
-_name: digital-io full tests
-_description: Full digital-io tests
-include:
-    digital-io/basic-loopback-test
-    after-suspend-digital-io/basic-loopback-test
-nested_part:
-
-
 id: ce-oem-digital-io-full
 unit: test plan
 _name: Digital I/O tests
@@ -56,4 +46,3 @@ bootstrap_include:
 include:
     ce-oem-digital-io/loopback_gpio_DO.*-DI.*
     ce-oem-digital-io/loopback_serial_DO.*-DI.*
-

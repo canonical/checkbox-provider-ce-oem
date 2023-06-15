@@ -6,7 +6,7 @@ from argparse import ArgumentParser, RawTextHelpFormatter
 
 class DigitalIOSysFsController():
 
-    TEST_STATES = [0, 1]
+    TEST_STATES = (0, 1)
     ROOT_PATH = "/sys/class/gpio"
 
     def __init__(self):
@@ -22,7 +22,7 @@ class DigitalIOSysFsController():
         Raises:
             SystemExit: exit with the test result
         """
-        print(f"# GPIO loopback test. out:{out_port}, in:{in_port}")
+        print("# GPIO loopback test. out:{}, in:{}".format(out_port, in_port))
         raise SystemExit(not self.loopback_test(out_port, in_port))
 
     def check_gpio_node(self, port):
@@ -31,7 +31,7 @@ class DigitalIOSysFsController():
         Args:
             port (str): the gpio port
         """
-        return os.path.exists(f"{self.ROOT_PATH}/gpio{port}")
+        return os.path.exists("{}/gpio{}".format(self.ROOT_PATH, port))
 
     def set_gpio(self, port, value):
         """Write the value to GPIO port
@@ -40,9 +40,9 @@ class DigitalIOSysFsController():
             port (str): the gpio port
             value (str): 0 or 1
         """
-        print(f"# Set GPIO {port} value to {value}")
-        with open(f"{self.ROOT_PATH}/gpio{port}/value", "wt") as fp:
-            fp.write(f"{value}\n")
+        print("# Set GPIO {} value to {}".format(port, value))
+        with open("{}/gpio{}/value".format(self.ROOT_PATH, port), "wt") as fp:
+            fp.write("{}\n".format(value))
 
     def read_gpio(self, port):
         """Read the value from GPIO port
@@ -53,9 +53,9 @@ class DigitalIOSysFsController():
         Returns:
             value (str): the value of gpio port
         """
-        with open(f"{self.ROOT_PATH}/gpio{port}/value", "r") as fp:
+        with open("{}/gpio{}/value".format(self.ROOT_PATH, port), "r") as fp:
             value = fp.read().strip()
-        print(f"# Read GPIO {port}, value is {value}")
+        print("# Read GPIO {}, value is {}".format(port, value))
         return value
 
     def set_direction(self, port, value):
@@ -65,9 +65,10 @@ class DigitalIOSysFsController():
             port (str): the gpio port
             direction (str): the direction of gpio port
         """
-        print(f"# Set GPIO {port} direction to {value}")
-        with open(f"{self.ROOT_PATH}/gpio{port}/direction", "w") as fp:
-            fp.write(f"{value}\n")
+        print("# Set GPIO {} direction to {}".format(port, value))
+        with open(
+            "{}/gpio{}/direction".format(self.ROOT_PATH, port), "w") as fp:
+            fp.write("{}\n".format(value))
 
     def configure_gpio(self, port, direction):
         """Initial and configure GPIO port
@@ -82,11 +83,11 @@ class DigitalIOSysFsController():
         try:
             # Export GPIO
             if not self.check_gpio_node(port):
-                with open(f"{self.ROOT_PATH}/export", "w") as f_export:
-                    f_export.write(f"{port}\n")
+                with open("{}/export".format(self.ROOT_PATH), "w") as fexport:
+                    fexport.write("{}\n".format(port))
 
             if not self.check_gpio_node(port):
-                print(f"Failed to export GPIO {port}\n")
+                print("Failed to export GPIO {}\n".format(port))
 
             # Set direction
             self.set_direction(port, direction)
