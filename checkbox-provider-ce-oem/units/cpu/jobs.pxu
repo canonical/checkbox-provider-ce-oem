@@ -43,7 +43,7 @@ flags: also-after-suspend
 estimated_duration: 1s
 requires: governors_list.driver != 'intel_pstate'
 imports: from com.canonical.qa.ceoem import governors_list
-command: nice -n -20 cpufreq_governors.py --performance
+command: nice -n -20 cpufreq_governors.py --governor performance
 
 id: ce-oem-cpu/cpufreq-governor-powersave
 _summary: Test "powersave" scaling governor
@@ -57,7 +57,7 @@ flags: also-after-suspend
 estimated_duration: 1s
 requires: governors_list.driver != 'intel_pstate'
 imports: from com.canonical.qa.ceoem import governors_list
-command: nice -n -20 cpufreq_governors.py --powersave
+command: nice -n -20 cpufreq_governors.py --governor powersave
 
 id: ce-oem-cpu/cpufreq-governor-userspace
 _summary: Test "userspace" scaling governor
@@ -72,7 +72,7 @@ flags: also-after-suspend
 estimated_duration: 1s
 requires: governors_list.driver != 'intel_pstate'
 imports: from com.canonical.qa.ceoem import governors_list
-command: nice -n -20 cpufreq_governors.py --userspace
+command: nice -n -20 cpufreq_governors.py --governor userspace
 
 id: ce-oem-cpu/cpufreq-governor-schedutil
 _summary: Test "schedutil" scaling governor
@@ -87,7 +87,7 @@ flags: also-after-suspend
 estimated_duration: 3s
 requires: governors_list.driver != 'intel_pstate'
 imports: from com.canonical.qa.ceoem import governors_list
-command: nice -n -20 cpufreq_governors.py --schedutil
+command: nice -n -20 cpufreq_governors.py --governor schedutil
 
 id: ce-oem-cpu/cpufreq-governor-ondemand
 _summary: Test "ondemand" scaling governor
@@ -103,7 +103,7 @@ flags: also-after-suspend
 estimated_duration: 10s
 requires: governors_list.driver != 'intel_pstate'
 imports: from com.canonical.qa.ceoem import governors_list
-command: nice -n -20 cpufreq_governors.py --ondemand
+command: nice -n -20 cpufreq_governors.py --governor ondemand
 
 id: ce-oem-cpu/cpufreq-governor-conservative
 _summary: Test "conservative" scaling governor
@@ -119,4 +119,4 @@ flags: also-after-suspend
 estimated_duration: 10s
 requires: governors_list.driver != 'intel_pstate'
 imports: from com.canonical.qa.ceoem import governors_list
-command: nice -n -20 cpufreq_governors.py --conservative
+command: nice -n -20 cpufreq_governors.py --governor conservative

@@ -680,8 +680,8 @@ class CPUScalingTest:
                   False otherwise.
         """
         logging.debug("Verifying maximum frequency")
-        logging.info("Running PI caculation")
-        # Do some caculation to make CPU busy
+        logging.info("Running PI calculation")
+        # Do some calculation to make CPU busy
         self.simulate_pi()
         logging.info("Done.")
         curr_freq = int(self.get_parameter_value("scaling_cur_freq"))
@@ -741,12 +741,9 @@ def main():
                      during the test run.
         --resource-format: Prints the capabilities in Checkbox resource job
                            format.
-        --userspace: Runs the Userspace Governor test.
-        --performance: Runs the Performance Governor test.
-        --powersave: Runs the Powersave Governor test.
-        --ondemand: Runs the Ondemand Governor test.
-        --conservative: Runs the Conservative Governor test.
-        --schedutil: Runs the Schedutil Governor test.
+        --governor: Run a specific Governor test. Available options:
+                    'userspace', 'performance', 'powersave', 'ondemand',
+                    'conservative', 'schedutil'.
 
     Returns:
         int: The exit code of the test run. 0 if successful, 1 otherwise.
@@ -773,34 +770,9 @@ def main():
         help="Print the capabilities in Checkbox resource job format.",
     )
     parser.add_argument(
-        "--userspace",
-        action="store_true",
-        help="Run Userspace Governor test",
-    )
-    parser.add_argument(
-        "--performance",
-        action="store_true",
-        help="Run Performance Governor test",
-    )
-    parser.add_argument(
-        "--powersave",
-        action="store_true",
-        help="Run Powersave Governor test",
-    )
-    parser.add_argument(
-        "--ondemand",
-        action="store_true",
-        help="Run Ondemand Governor test",
-    )
-    parser.add_argument(
-        "--conservative",
-        action="store_true",
-        help="Run Conservative Governor test",
-    )
-    parser.add_argument(
-        "--schedutil",
-        action="store_true",
-        help="Run Schedutil Governor test",
+        "--governor",
+        dest="governor",
+        help="Run Specific Governor Test",
     )
     args = parser.parse_args()
 
@@ -828,19 +800,12 @@ def main():
 
     exit_code = 0
 
-    test_methods = {
-        "userspace": test.test_userspace,
-        "performance": test.test_performance,
-        "powersave": test.test_powersave,
-        "ondemand": test.test_ondemand,
-        "conservative": test.test_conservative,
-        "schedutil": test.test_schedutil,
-    }
-
-    for arg, test_method in test_methods.items():
-        if getattr(args, arg):
-            if not test_method():
-                exit_code = 1
+    try:
+        if not getattr(test, "test_{}".format(args.governor))():
+            exit_code = 1
+    except AttributeError:
+        logging.error("Given governor is not supported")
+        return 1
 
     test.restore_governors()
     return exit_code
