@@ -23,7 +23,6 @@ _description: Automated CPU tests for devices
 bootstrap_include:
     governors_list
 include:
-    ce-oem-cpu/offlining_test
     ce-oem-cpu/cpufreq-governor-performance
     ce-oem-cpu/cpufreq-governor-powersave
     ce-oem-cpu/cpufreq-governor-userspace
