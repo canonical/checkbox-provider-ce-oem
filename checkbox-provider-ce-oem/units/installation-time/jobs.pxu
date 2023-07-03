@@ -1,7 +1,8 @@
 id: ce-oem-info/snapd_installation_time
 plugin: shell
 category_id: com.canonical.plainbox::info
-estimated_duration: 30
+_summary: Snapd installation time statistics via snap change log
+estimated_duration: 5
 imports: from com.canonical.certification import lsb
 requires: lsb.distributor_id == 'Ubuntu Core'
 command: installation_time.py snapd -a timing
