@@ -22,7 +22,6 @@ _description: Automated multiple RTC tests
 bootstrap_include:
 include:
 nested_part:
-    com.canonical.certification::rtc-automated
 
 id: after-suspend-ce-oem-rtc-manual
 unit: test plan
@@ -37,4 +36,3 @@ _description: Automated after suspend multiple RTC tests
 bootstrap_include:
 include:
 nested_part:
-    com.canonical.certification::after-suspend-rtc-automated
