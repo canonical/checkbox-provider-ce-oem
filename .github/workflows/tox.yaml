@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        python: ["3.5", "3.6", "3.8"]
+        python: ["3.5", "3.6", "3.8", "3.10"]
     steps:
       - uses: actions/checkout@v3
       - name: install stable checkbox and checkbox-provider-ce-oem
