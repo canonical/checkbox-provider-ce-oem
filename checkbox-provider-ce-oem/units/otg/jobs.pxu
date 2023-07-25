@@ -54,6 +54,7 @@ _steps:
 _verification:
     Does string send and receive work?
 command: 
+    # shellcheck disable=SC2050
     if [ {Mode} != "otg" ]; then
         echo -e "Error: USB mode is {Mode} mode, but expected in otg mode."
         exit 1 
@@ -88,6 +89,7 @@ _verification:
     The host detects and mounts a mass storage device. It has read and write 
     permissions on it.
 command:
+    # shellcheck disable=SC2050
     if [ {Mode} != "otg" ]; then
         echo -e "Error: USB mode is {Mode} mode, but expected in otg mode."
         exit 1 
@@ -124,6 +126,7 @@ _steps:
 _verification:
     The host and {USB_port} can ping each other.
 command:
+    # shellcheck disable=SC2050
     if [ {Mode} != "otg" ]; then
         echo -e "Error: USB mode is {Mode} mode, but expected in otg mode."
         exit 1 
