@@ -10,14 +10,7 @@ environ: OTG
 flags: preserve-locale
 user: root
 command:
-    awk '{
-        split($0, record, " ")
-        for (i in record) {
-            split(record[i], data, ":")
-            cmd = "multiple-otg.sh -p " data[1] " -n " data[2]
-            system(cmd)
-        }
-    }' <<< "$OTG"
+    multiple-otg.sh -c "$OTG"
 
 unit: template
 template-resource: otg_ports

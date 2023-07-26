@@ -13,29 +13,32 @@ language="0x409"  # specifically refers to the English language (English-US).
 otg_info() {
     # Mapping following information: 
     # USB port, USB node, working mode(host/device/otg), UDC
-    for dr_mode_file in "${usb_dr_modes[@]}"; do
-        # A list of dr_mode in system.
-        usb_node=$(awk -F'[/@]' '{print $(NF-1)}' <<< "$dr_mode_file")
-        otg_mode=$(tr -d '\0' < "$dr_mode_file")
-        # The USB ports and nodes input through the checkbox configuration 
-        # will be mapped to the UDC (USB Device Controller) in the system. 
-        if [ "$2" == "$usb_node" ]; then
-            echo -e "USB_port: $1"
-            echo -e "USB_Node: $usb_node"
-            echo -e "Mode: $otg_mode"
-            found_udc=false
-            for udc in "${udc_list[@]}"; do
-                if [[ "$udc" == *"$usb_node"* ]] || [[ $(find "$device_path" -wholename "*/$udc/$usb_node.xhci") ]]; then
-                    echo -e "UDC: $udc\n"
-                    found_udc=true
-                    break
+    IFS=' ' read -ra usb_list <<< "$1"
+    for usb in "${usb_list[@]}"; do
+        IFS=':' read -r port node <<< "$usb"
+        for dr_mode_file in "${usb_dr_modes[@]}"; do
+            # A list of dr_mode in system.
+            usb_node=$(awk -F'[/@]' '{print $(NF-1)}' <<< "$dr_mode_file")
+            otg_mode=$(tr -d '\0' < "$dr_mode_file")
+            # The USB ports and nodes input through the checkbox configuration 
+            # will be mapped to the UDC (USB Device Controller) in the system. 
+            if [ "$node" == "$usb_node" ]; then
+                echo -e "USB_port: $port"
+                echo -e "USB_Node: $usb_node"
+                echo -e "Mode: $otg_mode"
+                found_udc=false
+                for udc in "${udc_list[@]}"; do
+                    if [[ "$udc" == *"$usb_node"* ]] || [[ $(find "$device_path" -wholename "*/$udc/$usb_node.xhci") ]]; then
+                        echo -e "UDC: $udc\n"
+                        found_udc=true
+                        break
+                    fi
+                done
+                if ! "$found_udc"; then
+                    echo -e "UDC: None\n"
                 fi
-            done
-            if ! "$found_udc"; then
-                echo -e "UDC: None\n"
             fi
-        fi
-
+        done
     done
 }
 
@@ -152,8 +155,8 @@ main() {
     if [ "$teardown" == "true" ]; then
         teardown
     fi
-    if [[ -n "$port" && -n $node ]]; then
-        otg_info "$port" "$node"
+    if [[ -n "$config" ]]; then
+        otg_info "$config"
     fi
 }
 
@@ -165,22 +168,20 @@ help_function() {
     echo -e "\t-u    The UDC address under /sys/class/udc. e.g., 11201000.usb"
     echo -e "\t-f    Support function in acm/ecm/mass_storage."
     echo -e "\t-t    Teardown the environment."
-    echo -e "\t-p    USB port name."
-    echo -e "\t-n    USB node for the port."
+    echo -e "\t-c    Checkbox config argument OTG"
 }
 
-while getopts "u:f:t:p:n:" opt; do
+while getopts "u:f:t:c:" opt; do
     case "$opt" in
         u) udc="$OPTARG" ;;
         f) function="$OPTARG" ;;
         t) teardown="$OPTARG" ;;
-        p) port="$OPTARG" ;;
-        n) node="$OPTARG" ;;
+        c) config="$OPTARG" ;;
         ?) help_function ;;
     esac
 done
 
-if [[ -z "$udc" && -z "$function" && -z "$teardown" && -z "$port" && -z "$node" ]]; then
+if [[ -z "$udc" && -z "$function" && -z "$teardown" && -z "$config" ]]; then
     echo -e "Error: Argument expected!!"
     help_function
     exit 1
