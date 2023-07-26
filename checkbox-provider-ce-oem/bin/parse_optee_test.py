@@ -14,9 +14,9 @@ def parse_json_file(filename, filter=False):
 
 
 def print_test_info(test):
-    print(f"suite: {test['suite']}")
-    print(f"test_id: {test['test_id']}")
-    print(f"description: {test['test_description']}\n")
+    print("suite: {}".format(test['suite']))
+    print("test_id: {}".format(test['test_id']))
+    print("description: {}\n".format(test['test_description']))
 
 
 def main():
