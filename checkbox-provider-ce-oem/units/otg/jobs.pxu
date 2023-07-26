@@ -52,7 +52,6 @@ command:
         echo -e "Error: USB mode is {Mode} mode, but expected in otg mode."
         exit 1 
     fi
-    multiple-otg.sh -t true
     multiple-otg.sh -u {UDC} -f acm
 
 unit: template
@@ -87,7 +86,6 @@ command:
         echo -e "Error: USB mode is {Mode} mode, but expected in otg mode."
         exit 1 
     fi
-    multiple-otg.sh -t true
     multiple-otg.sh -u {UDC} -f mass_storage
 
 unit: template
@@ -124,5 +122,4 @@ command:
         echo -e "Error: USB mode is {Mode} mode, but expected in otg mode."
         exit 1 
     fi
-    multiple-otg.sh -t true
     multiple-otg.sh -u {UDC} -f ecm

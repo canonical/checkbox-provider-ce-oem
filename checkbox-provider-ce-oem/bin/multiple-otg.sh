@@ -14,7 +14,7 @@ otg_info() {
     # Mapping following information: 
     # USB port, USB node, working mode(host/device/otg), UDC
     IFS=' ' read -ra usb_list <<< "$1"
-    for usb in "${usb_list[@]}"; do
+    for usb in "${usb_list[@]}"; do     
         IFS=':' read -r port node <<< "$usb"
         for dr_mode_file in "${usb_dr_modes[@]}"; do
             # A list of dr_mode in system.
@@ -26,17 +26,14 @@ otg_info() {
                 echo -e "USB_port: $port"
                 echo -e "USB_Node: $usb_node"
                 echo -e "Mode: $otg_mode"
-                found_udc=false
+                found_udc="None"
                 for udc in "${udc_list[@]}"; do
                     if [[ "$udc" == *"$usb_node"* ]] || [[ $(find "$device_path" -wholename "*/$udc/$usb_node.xhci") ]]; then
-                        echo -e "UDC: $udc\n"
-                        found_udc=true
+                        found_udc="$udc"
                         break
                     fi
                 done
-                if ! "$found_udc"; then
-                    echo -e "UDC: None\n"
-                fi
+                echo -e "UDC: $found_udc\n"
             fi
         done
     done
@@ -117,8 +114,7 @@ create_function() {
 
 activate() {
     echo -e "\nInfo: Attempting to activate function ..."
-    local udc=$1
-    echo "$udc" > "$gadget_path/g1/UDC" || exit 1
+    echo "$1" > "$gadget_path/g1/UDC" || exit 1
     echo -e "\nInfo: Done!"
 }
 
@@ -151,11 +147,11 @@ main() {
         create_config
         create_function "$function"
         activate "$udc"
-    fi
-    if [ "$teardown" == "true" ]; then
+        echo -e "\nInfo: USB OTG gadget has been probed ...\"
+                \nInfo: Press ENTER to teardown the test environment once your test is finied."
+        read -r
         teardown
-    fi
-    if [[ -n "$config" ]]; then
+    elif [[ -n "$config" ]]; then
         otg_info "$config"
     fi
 }
@@ -167,21 +163,19 @@ help_function() {
     echo "Usage: multiple-otg.sh -u {udc_address} -f [acm|ecm|mass_storage] -t [true|false] -i [true|false]"
     echo -e "\t-u    The UDC address under /sys/class/udc. e.g., 11201000.usb"
     echo -e "\t-f    Support function in acm/ecm/mass_storage."
-    echo -e "\t-t    Teardown the environment."
     echo -e "\t-c    Checkbox config argument OTG"
 }
 
-while getopts "u:f:t:c:" opt; do
+while getopts "u:f:c:" opt; do
     case "$opt" in
         u) udc="$OPTARG" ;;
         f) function="$OPTARG" ;;
-        t) teardown="$OPTARG" ;;
         c) config="$OPTARG" ;;
         ?) help_function ;;
     esac
 done
 
-if [[ -z "$udc" && -z "$function" && -z "$teardown" && -z "$config" ]]; then
+if [[ -z "$udc" && -z "$function" && -z "$config" ]]; then
     echo -e "Error: Argument expected!!"
     help_function
     exit 1
