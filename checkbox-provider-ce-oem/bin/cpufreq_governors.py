@@ -46,6 +46,12 @@ class CPUScalingInfo:
     """A class for gathering CPU scaling information."""
 
     def __init__(self, policy=0):
+        """
+        Initialize the CPUScalingInfo object.
+
+        Args:
+            policy (int): The CPU policy number to be used (default is 0).
+        """
         self.sys_cpu_dir = "/sys/devices/system/cpu"
         self.policy = policy
         self.cpu_policies = self.get_cpu_policies()
@@ -56,6 +62,12 @@ class CPUScalingInfo:
         self.affected_cpus = self.get_affected_cpus()
 
     def get_cpu_policies(self) -> List:
+        """
+        Get a list of available CPU policies.
+
+        Returns:
+            List: A sorted list of available CPU policy numbers.
+        """
         path = os.path.join(self.sys_cpu_dir, "cpufreq")
         try:
             policies = [
@@ -72,6 +84,15 @@ class CPUScalingInfo:
         return sorted(policies)
 
     def get_scaling_driver(self, policy=0) -> str:
+        """
+        Get the scaling driver used by a specific CPU policy.
+
+        Args:
+            policy (int): The CPU policy number to query (default is 0).
+
+        Returns:
+            str: The name of the scaling driver for the specified policy.
+        """
         path = os.path.join(
             self.sys_cpu_dir,
             "cpufreq",
@@ -87,6 +108,14 @@ class CPUScalingInfo:
             return ""
 
     def print_policies_list(self) -> bool:
+        """
+        Print the list of CPU policies and their corresponding scaling drivers
+
+        The output is in Checkbox resource job format.
+
+        Returns:
+            bool: True if the list is printed successfully, False otherwise.
+        """
         if not self.cpu_policies:
             return False
         for policy in self.cpu_policies:
@@ -97,6 +126,17 @@ class CPUScalingInfo:
         return True
 
     def print_scaling_drivers(self) -> bool:
+        """
+        Print the unique scaling drivers used by available CPU policies.
+
+        If there are multiple drivers, they will be listed in a
+        space-separated format. Example:
+        "scaling_driver: driver_a driver_b"
+
+        Returns:
+            bool: True if the drivers are printed successfully,
+                  False otherwise.
+        """
         if not self.cpu_policies:
             return False
         drivers = []
@@ -111,6 +151,15 @@ class CPUScalingInfo:
             return True
 
     def get_attribute(self, attr) -> str:
+        """
+        Get the value of a specific attribute from the CPU sysfs.
+
+        Args:
+            attr (str): The name of the attribute to query.
+
+        Returns:
+            str: The value of the specified attribute.
+        """
         logging.debug("Getting value from attribute '%s'", attr)
         path = os.path.join(self.sys_cpu_dir, attr)
         try:
@@ -122,11 +171,30 @@ class CPUScalingInfo:
             return ""
 
     def get_policy_attribute(self, attr) -> str:
+        """
+        Get the value of a specific attribute for the current CPU policy.
+
+        Args:
+            attr (str): The name of the attribute to query.
+
+        Returns:
+            str: The value of the specified attribute for the current policy.
+        """
         return self.get_attribute(
             "cpufreq/policy{}/{}".format(self.policy, attr)
         )
 
     def set_attribute(self, attr, value) -> bool:
+        """
+        Set the value of a specific attribute in the CPU sysfs.
+
+        Args:
+            attr (str): The name of the attribute to set.
+            value (str): The value to be set for the attribute.
+
+        Returns:
+            bool: True if the attribute is set successfully, False otherwise.
+        """
         logging.debug("Setting value '%s' to attribute '%s'", value, attr)
         path = os.path.join(self.sys_cpu_dir, attr)
         try:
@@ -141,41 +209,90 @@ class CPUScalingInfo:
         return True
 
     def set_policy_attribute(self, attr, value) -> bool:
+        """
+        Set the value of a specific attribute for the current CPU policy.
+
+        Args:
+            attr (str): The name of the attribute to set.
+            value (str): The value to be set for the attribute.
+
+        Returns:
+            bool: True if the attribute is set successfully, False otherwise.
+        """
         return self.set_attribute(
             "cpufreq/policy{}/{}".format(self.policy, attr), value
         )
 
     def get_min_frequency(self) -> int:
+        """
+        Get the minimum CPU frequency for the current policy.
+
+        Returns:
+            int: The minimum CPU frequency in kHz.
+        """
         frequency = self.get_policy_attribute("scaling_min_freq")
         return int(frequency) if frequency else 0
 
     def get_max_frequency(self) -> int:
+        """
+        Get the maximum CPU frequency for the current policy.
+
+        Returns:
+            int: The maximum CPU frequency in kHz.
+        """
         frequency = self.get_policy_attribute("scaling_max_freq")
         return int(frequency) if frequency else 0
 
     def get_affected_cpus(self) -> List:
+        """
+        Get the list of affected CPUs for the current policy.
+
+        Returns:
+            List: A list of affected CPUs as strings.
+        """
         values = self.get_policy_attribute("affected_cpus")
         return values.split()
 
     def get_supported_governors(self) -> List:
+        """
+        Get the list of supported governors for the current policy.
+
+        Returns:
+            List: A list of supported governors as strings.
+        """
         values = self.get_policy_attribute("scaling_available_governors")
         return values.split()
 
-    def get_governor(self) -> bool:
+    def get_governor(self) -> str:
+        """
+        Get the current governor for the current policy.
+
+        Returns:
+            str: The name of the current governor as a string.
+        """
         return self.get_policy_attribute("scaling_governor")
 
     def set_governor(self, governor) -> bool:
+        """
+        Set the governor for the current policy.
+
+        Args:
+            governor (str): The name of the governor to set.
+
+        Returns:
+            bool: True if the governor is set successfully, False otherwise.
+        """
         return self.set_policy_attribute("scaling_governor", governor)
 
     def set_frequency(self, frequency) -> bool:
         """
-        Set the CPU frequency to the specified value.
+        Set the CPU frequency for the current policy.
 
         Args:
-            frequency: The CPU frequency value to be set.
+            frequency (int): The CPU frequency value to be set in kHz.
 
         Returns:
-            bool: True if the frequency was successfully set and verified,
+            bool: True if the frequency is set and verified successfully,
                   False otherwise.
         """
         logging.debug("Setting Frequency to %s", frequency)
@@ -186,10 +303,23 @@ class CPUScalingTest:
     """A class for CPU scaling test operations."""
 
     def __init__(self, policy=0):
+        """
+        Initialize the CPUScalingTest object.
+
+        Args:
+            policy (int): The CPU policy number to be used (default is 0).
+        """
         self.policy = policy
         self.info = CPUScalingInfo(policy=self.policy)
 
     def stress_cpus(self) -> subprocess.Popen:
+        """
+        Stress the CPU cores by running multiple dd processes.
+
+        Returns:
+            subprocess.Popen: A list of Popen objects representing the
+                              dd processes spawned for each CPU core.
+        """
         cpus_count = cpu_count()
 
         cmd = ["dd", "if=/dev/zero", "of=/dev/null"]
@@ -197,11 +327,21 @@ class CPUScalingTest:
         return processes
 
     def stop_stress_cpus(self, processes):
+        """
+        Stop the CPU stress by terminating the specified dd processes.
+
+        Args:
+            processes (List[subprocess.Popen]): A list of Popen objects
+                                                representing the dd processes.
+        """
         for p in processes:
             p.terminate()
             p.wait()
 
     def print_policy_info(self):
+        """
+        Print information about the CPU frequency policy for the current CPU.
+        """
         logging.info("## CPUfreq Policy%s Info ##", self.policy)
         logging.info("Affected CPUs:")
         if not self.info.governors:
@@ -580,6 +720,21 @@ class CPUScalingTest:
 
 
 def main():
+    """
+    Execute the CPU scaling test based on the provided command-line arguments.
+
+    Command-line arguments:
+        -d, --debug: Turn on debug level output for extra info during the
+                     test run.
+        --policy-resource: Print the policies list in Checkbox resource job
+                           format.
+        --driver-detect: Print the CPU scaling driver.
+        --policy: Run the test on a specific CPU policy (default is policy 0).
+        --governor: Run a specific governor test.
+
+    Returns:
+        int: The exit code of the test execution, 0 if successful, 1 otherwise.
+    """
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "-d",
