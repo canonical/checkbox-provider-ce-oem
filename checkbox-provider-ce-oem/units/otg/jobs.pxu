@@ -36,7 +36,7 @@ _steps:
     2. Connect a USB cable from an Ubuntu host to the {USB_port} on DUT.
     3. On the host, to check if ttyACM0 has been probed
         $ ls /dev/ttyACM0
- 	4. On the host, listen to the ttyACM0 port as a receive side.
+    4. On the host, listen to the ttyACM0 port as a receive side.
         $ sudo su
         $ cat /dev/ttyACM0
     5. On DUT, send a string via /dev/ttyGS0 as a send side.
@@ -76,7 +76,7 @@ _purpose:
 _steps:
     1. Press Enter to setup a 16 MB FAT32 image on the device.
     2. From an Ubuntu host, connect a cable to the USB OTG port 
-    (it's the USB type C connector) of the DUT.
+    (it's the USB connector) of the DUT.
 _verification:
     The host detects and mounts a mass storage device. It has read and write 
     permissions on it.
@@ -108,7 +108,7 @@ _purpose:
     (host), {USB_port} can be detected as a USB ethernet device by the host.
 _steps:
     1. From an Ubuntu host, connect a cable to the USB OTG port 
-     (it's the USB type C connector) of the {USB_port}.
+     (it's the USB connector) of the {USB_port}.
     2. Press Enter to config the IP address for the USB OTG ethernet interface on the DUT.
      (IP will be 192.168.9.1/24)
     3. On the host, config the IP address for the USB OTG ethernet interface. And it should be 

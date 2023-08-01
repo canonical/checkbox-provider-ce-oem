@@ -160,7 +160,7 @@ main() {
 help_function() {
     echo "This script is used to test multiple USB OTG functions."
     echo
-    echo "Usage: multiple-otg.sh -u {udc_address} -f [acm|ecm|mass_storage] -t [true|false] -i [true|false]"
+    echo "Usage: multiple-otg.sh -u {udc_address} -f [acm|ecm|mass_storage] -c {checkbox config argument OTG}"
     echo -e "\t-u    The UDC address under /sys/class/udc. e.g., 11201000.usb"
     echo -e "\t-f    Support function in acm/ecm/mass_storage."
     echo -e "\t-c    Checkbox config argument OTG"
