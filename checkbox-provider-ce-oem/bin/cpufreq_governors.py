@@ -771,7 +771,8 @@ def main():
 
     info = CPUScalingInfo()
     if args.policy_resource:
-        return 0 if info.print_policies_list() else 1
+        info.print_policies_list()
+        return 0
 
     if args.driver_detect:
         return 0 if info.print_scaling_drivers() else 1
