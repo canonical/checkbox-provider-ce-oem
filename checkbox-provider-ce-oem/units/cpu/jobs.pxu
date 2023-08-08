@@ -84,7 +84,7 @@ plugin: shell
 user: root
 category_id: com.canonical.plainbox::cpu
 flags: also-after-suspend
-estimated_duration: 11s
+estimated_duration: 14s
 depends: ce-oem-cpu/cpufreq_driver_detect
 command: cpufreq_governors.py --policy {policy} --governor schedutil
 
@@ -103,7 +103,7 @@ plugin: shell
 user: root
 category_id: com.canonical.plainbox::cpu
 flags: also-after-suspend
-estimated_duration: 11s
+estimated_duration: 14s
 depends: ce-oem-cpu/cpufreq_driver_detect
 command: cpufreq_governors.py --policy {policy} --governor ondemand
 
@@ -122,6 +122,6 @@ plugin: shell
 user: root
 category_id: com.canonical.plainbox::cpu
 flags: also-after-suspend
-estimated_duration: 11s
+estimated_duration: 14s
 depends: ce-oem-cpu/cpufreq_driver_detect
 command: cpufreq_governors.py --policy {policy} --governor conservative

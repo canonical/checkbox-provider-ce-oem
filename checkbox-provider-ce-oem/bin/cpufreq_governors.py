@@ -125,31 +125,6 @@ class CPUScalingInfo:
             print()
         return True
 
-    def print_scaling_drivers(self) -> bool:
-        """
-        Print the unique scaling drivers used by available CPU policies.
-
-        If there are multiple drivers, they will be listed in a
-        space-separated format. Example:
-        "scaling_driver: driver_a driver_b"
-
-        Returns:
-            bool: True if the drivers are printed successfully,
-                  False otherwise.
-        """
-        if not self.cpu_policies:
-            return False
-        drivers = []
-        for policy in self.cpu_policies:
-            driver = self.get_scaling_driver(policy)
-            if driver not in drivers:
-                drivers.append(driver)
-        if not drivers:
-            return False
-        else:
-            print("scaling_driver: {}".format(" ".join(drivers)))
-            return True
-
     def get_attribute(self, attr) -> str:
         """
         Get the value of a specific attribute from the CPU sysfs.
@@ -365,6 +340,31 @@ class CPUScalingTest:
 
         logging.info("Current Governor: %s", self.info.original_governor)
 
+    def test_driver_detect(self) -> bool:
+        """
+        Print the unique scaling drivers used by available CPU policies.
+
+        If there are multiple drivers, they will be listed in a
+        space-separated format. Example:
+        "scaling_driver: driver_a driver_b"
+
+        Returns:
+            bool: True if the drivers are printed successfully,
+                  False otherwise.
+        """
+        if not self.info.cpu_policies:
+            return False
+        drivers = []
+        for policy in self.info.cpu_policies:
+            driver = self.info.get_scaling_driver(policy)
+            if driver not in drivers:
+                drivers.append(driver)
+        if not drivers:
+            return False
+        else:
+            print("scaling_driver: {}".format(" ".join(drivers)))
+            return True
+
     def test_userspace(self) -> bool:
         """
         Run the Userspace Governor Test.
@@ -544,7 +544,7 @@ class CPUScalingTest:
 
         logging.info("Stop stressing CPUs...")
         self.stop_stress_cpus(stress_process)
-        time.sleep(5)
+        time.sleep(8)
 
         curr_freq = int(self.info.get_policy_attribute("scaling_cur_freq"))
         logging.debug("Current CPU frequency: %s MHz", (curr_freq / 1000))
@@ -612,7 +612,7 @@ class CPUScalingTest:
 
         logging.info("Stop stressing CPUs...")
         self.stop_stress_cpus(stress_process)
-        time.sleep(5)
+        time.sleep(8)
 
         curr_freq = int(self.info.get_policy_attribute("scaling_cur_freq"))
         logging.debug("Current CPU frequency: %s MHz", (curr_freq / 1000))
@@ -680,7 +680,7 @@ class CPUScalingTest:
 
         logging.info("Stop stressing CPUs...")
         self.stop_stress_cpus(stress_process)
-        time.sleep(5)
+        time.sleep(8)
 
         curr_freq = int(self.info.get_policy_attribute("scaling_cur_freq"))
         logging.debug("Current CPU frequency: %s MHz", (curr_freq / 1000))
@@ -774,13 +774,12 @@ def main():
         info.print_policies_list()
         return 0
 
+    test = CPUScalingTest(policy=args.policy)
     if args.driver_detect:
-        return 0 if info.print_scaling_drivers() else 1
+        return 0 if test.test_driver_detect() else 1
 
     exit_code = 0
-
     try:
-        test = CPUScalingTest(policy=args.policy)
         test.print_policy_info()
         if not getattr(test, "test_{}".format(args.governor))():
             exit_code = 1
