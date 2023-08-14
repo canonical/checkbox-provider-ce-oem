@@ -4,12 +4,8 @@
   This job will check if OP-TEE node (teepriv0 and tee0) have been probed.
   And it relies on the manifest "has_optee" to be true.
 
-## id: ce-oem-optee/connect-plugs
-  This job will connect the necessary interfaces for optee-test.
-  And it relies on the snap "optee-test" to be installed in devmode.
-  For i.MX serise platform, please install channel 20-imx or 22-imx.
->e.g. Install for UC20<br>
-  $ sudo snap install optee-test --channel=20-imx --devmode
+## id: ce-oem-optee/xtest-check
+  This job will check if xtest is in gadget snap. Since xtest and TA rely on the same signing key with optee-os and optee-client. Therefore, xtest will be build-in in gadget snap.
   
 ## Test coverage
   We have covered the default tests of optee-test, which include: 
