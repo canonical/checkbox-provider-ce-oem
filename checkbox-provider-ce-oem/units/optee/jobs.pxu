@@ -7,7 +7,7 @@ estimated_duration: 20.0
 requires: manifest.has_optee == 'True'
 imports: from com.canonical.plainbox import manifest
 command: 
-    node=$(find /dev -type c -regex '.*/\(tee\|teepriv\)[0-9]')
+    node="$(find /dev -type c -regex '.*/\(tee\|teepriv\)[0-9]')"
     if [[ -n $node ]]; then
       echo -e "\nInfo: Find OP-TEE node in the system!"
       for x in $node
@@ -19,43 +19,22 @@ command:
       exit 1
     fi
 
-id: ce-oem-optee/connect-plugs
+id: ce-oem-optee/xtest-check
 category_id: optee
-_summary: Connect plugs and slot for optee test snap
+_summary: Check if xtest is in the gedget snap.
 plugin: shell
 user: root
-requires: 
-    snap.name == 'optee-test'
-    interface.name == 'tee'
-    interface.name == 'tee-plugins'
-    interface.name == 'tee-tas'
-imports: 
-    from com.canonical.certification import interface
-    from com.canonical.certification import snap
 estimated_duration: 20.0
 command: 
     gadget=$(snap list | awk '$NF == "gadget" {print $1}')
-    status=0
-    plugs=("tee-plugins" "tee-tas" "tee")
-    for x in "${plugs[@]}";
-    do
-        echo -e "\nConnecting interface $x ..."
-        if [ "$x" != "tee" ]; then
-            if ! snap connect "optee-test:$x" "$gadget:$x"; then
-                echo -e "\nError: Connect interface $x failed."
-                status=1 
-            fi
-        else
-            if ! snap connect "optee-test:$x" ":$x"; then
-                echo -e "\nError: Connect interface $x failed."
-                status=1 
-            fi
-        fi
-    done
-    if [ $status != 0 ]; then 
-        exit 1
+    xtest=$(snap info "$gadget"|grep xtest)
+    if [[ "$xtest" ]]; then
+        echo -e "\nInfo: Gadget snap support xtest command!"
+        echo -e "$xtest"
+        exit 0
     else
-        echo -e "\nInfo: Interfaces connect done."
+        echo -e "\nError: Gadget snap not support xtest command!"
+        exit 1
     fi
 depends: ce-oem-optee/device-node
 
@@ -65,20 +44,18 @@ _summary: Install Trusted Applications for xtest
 plugin: shell
 user: root
 estimated_duration: 20.0
-depends: ce-oem-optee/connect-plugs
-requires: snap.name == 'optee-test'
-imports: from com.canonical.certification import snap
+depends: ce-oem-optee/xtest-check
 command: 
     gadget=$(snap list | awk '$NF == "gadget" {print $1}')
     # TA will be copied into this path once interface tee-tas connected.
     # optee-test snap need to be installed in devmode
-    ta_path="/var/snap/$gadget/common/lib/optee_armtz"
+    ta_path="/snap/$gadget/current/lib/optee_armtz/"
     if [[ -z "$(find "$ta_path" -mindepth 1 -type f -o -type d)" ]]; then
         echo -e "\nError: Not able to find TA!"
         exit 1
     else
         echo -e '\nAttempting to install TA ...'
-        if ! optee-test.xtest --install-ta "$ta_path"; then
+        if ! "$gadget.xtest" --install-ta "$ta_path"; then
             echo -e '\nError: TA installed FAIL!'
             exit 1
         else
@@ -103,29 +80,33 @@ _summary: Collect the test cases related with PKCS11 support by OP-TEE test(xtes
 unit: template
 template-resource: ce-oem-optee-test-list
 template-unit: job
-id: ce-oem-optee/xtest-{suite}-{description}
+template-engine: jinja2
+id: ce-oem-optee/xtest-{{ suite }}-{{ description }}
 _summary: 
-  OP-TEE test by using xtest to test suite {suite} {description}
+    OP-TEE test by using xtest to test suite {{ suite }} {{ description }}
 plugin: shell
 user: root
 category_id: optee
 estimated_duration: 30
 flags: also-after-suspend
 depends: ce-oem-optee/ta-install
-command: optee-test.xtest -t {suite} {test_id}
+command: 
+    gadget=$(snap list | awk '$NF == "gadget" {print $1}')
+    "$gadget.xtest" -t {{ suite }} {{ test_id }}
 
 unit: template
 template-resource: ce-oem-optee-test-list-pkcs11
 template-unit: job
-id: ce-oem-optee/xtest-{suite}-{description}
+template-engine: jinja2
+id: ce-oem-optee/xtest-{{ suite }}-{{ description }}
 _summary: 
-  OP-TEE test by using xtest to test PKCS11 related {suite} {description}
+    OP-TEE test by using xtest to test PKCS11 related {{ suite }} {{ description }}
 plugin: shell
 user: root
 category_id: optee
 estimated_duration: 30
-requires: snap.name == 'optee-test'
-imports: from com.canonical.certification import snap
-depends: ce-oem-optee/connect-plugs
+depends: ce-oem-optee/xtest-check
 flags: also-after-suspend
-command: optee-test.xtest -t {suite} {test_id}
+command: 
+    gadget=$(snap list | awk '$NF == "gadget" {print $1}')
+    "$gadget.xtest" -t {{ suite }} {{ test_id }}
