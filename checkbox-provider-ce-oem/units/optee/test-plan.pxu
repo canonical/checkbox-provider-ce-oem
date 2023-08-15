@@ -15,9 +15,11 @@ bootstrap_include:
     ce-oem-optee-test-list-pkcs11
 include:
     ce-oem-optee/device-node
-    ce-oem-optee/connect-plugs
+    ce-oem-optee/xtest-check
     ce-oem-optee/ta-install
-    ce-oem-optee/xtest-.*
+    ce-oem-optee/xtest-regression.*
+    ce-oem-optee/xtest-benchmark.*
+    ce-oem-optee/xtest-pkcs11.*
 
 id: after-suspend-ce-oem-optee-full
 unit: test plan
@@ -33,4 +35,6 @@ _name: After suspend OP-TEE auto tests
 _description: Automated after-suspend OP-TEE tests for devices
 bootstrap_include:
 include:
-    after-suspend-ce-oem-optee/xtest-.*
+    after-suspend-ce-oem-optee/xtest-regression.*
+    after-suspend-ce-oem-optee/xtest-benchmark.*
+    after-suspend-ce-oem-optee/xtest-pkcs11.*
