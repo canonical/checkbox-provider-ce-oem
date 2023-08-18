@@ -17,7 +17,6 @@
 
 import argparse
 import time
-import multiprocessing
 import threading
 import queue
 import evdev
