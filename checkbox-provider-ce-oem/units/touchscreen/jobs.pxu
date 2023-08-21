@@ -13,8 +13,6 @@ _purpose:
 _steps:
     1. Commence the test
     2. Tap the screen with one finger.
-_verification:
-    If the tap is not detected the test will time out after 10 seconds.
 user: root
 command: evdev_touch_test.py '{{ product }}' -x 1
 flags: also-after-suspend
@@ -37,8 +35,6 @@ _steps:
     1. Commence the test
     2. Tap the screen with 10 fingers
     (Or the maximum supported fingers for this touchscreen)
-_verification:
-    If the tap is not detected the test will time out after 10 seconds.
 user: root
 command:
     VAR_MAX="${TOUCHSCREEN_MAX_FINGERS:-10}"
