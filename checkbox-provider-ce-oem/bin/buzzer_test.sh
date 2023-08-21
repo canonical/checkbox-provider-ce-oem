@@ -33,8 +33,9 @@ export_gpio() {
 }
 
 test_pwm_buzzer() {
-    echo "Setting up period of $type chip$chipnum pwm$port to 1 sec"
-    echo "Setting up duty cycle to 0.5 sec"
+    # Make sounds with different musical scale by pwm
+    echo "Configure $type chip$chipnum pwm$port"
+    echo "Setting up duty cycle to 0.125 sec"
     echo '125000' > "$node"/duty_cycle
 
     for i in 262 277 294 311 330 349 370 392 415;
