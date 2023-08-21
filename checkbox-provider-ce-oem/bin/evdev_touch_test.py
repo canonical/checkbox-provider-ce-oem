@@ -143,17 +143,25 @@ def capture_events(device, event_queue):
 
 def main():
     """
-    the scripts would capture all touch events to queue by evdev module in background
-    and compare the event one by one once received a SYN_REPORT event
+    the scripts would capture all touch events to queue by
+    evdev module in background, and compare the event
+    one by one once received a SYN_REPORT event
 
-    For the single touch event
-        option 1: a BTN_TOUCH, ABS_X and ABS_Y is required in a event group
-        option 2: ABS_MT_TRACKING_ID, ABS_MT_POSITION_X and ABS_MT_POSITION_Y is required in a event group
-                  the ABS_MT_SLOT event must not exist
-        option 3: ABS_MT_TRACKING_ID, ABS_MT_POSITION_X, ABS_MT_POSITION_Y and ABS_MT_SLOT is required in a event group
-                  only one ABS_MT_SLOT is received and the value of ABS_MT_SLOT event must be 0
-    For the multiple touch event
-        ABS_MT_TRACKING_ID, ABS_MT_POSITION_X, ABS_MT_POSITION_Y and ABS_MT_SLOT is required in a event group
+    ## For the single touch event
+    option 1:
+        a BTN_TOUCH, ABS_X and ABS_Y is required in a event group
+    option 2:
+        ABS_MT_TRACKING_ID, ABS_MT_POSITION_X and ABS_MT_POSITION_Y
+        is required in a event group, the ABS_MT_SLOT event must not exist
+    option 3:
+        ABS_MT_TRACKING_ID, ABS_MT_POSITION_X, ABS_MT_POSITION_Y
+        and ABS_MT_SLOT is required in a event group,
+        only one ABS_MT_SLOT is received
+        and the value of ABS_MT_SLOT event must be 0
+
+    ## For the multiple touch event
+        ABS_MT_TRACKING_ID, ABS_MT_POSITION_X, ABS_MT_POSITION_Y
+        and ABS_MT_SLOT is required in a event group.
         the value of ABS_MT_SLOT event must be (tap number - 1)
     """
 

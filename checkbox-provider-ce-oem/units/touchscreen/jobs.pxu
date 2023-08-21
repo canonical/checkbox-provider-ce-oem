@@ -8,14 +8,13 @@ category_id: com.canonical.plainbox::touchscreen
 id: ce-oem-touchscreen/evdev/single-touch-tap-{{ product_slug }}
 imports: from com.canonical.certification import device
 estimated_duration: 10.0
-_description:
-  PURPOSE:
-     Validate that single-touch tap is properly detected
-  STEPS:
-     1. Commence the test
-     2. Tap the screen with one finger.
-  VERIFICATION:
-     If the tap is not detected the test will time out after 10 seconds.
+_purpose:
+    Validate that single-touch tap is properly detected
+_steps:
+    1. Commence the test
+    2. Tap the screen with one finger.
+_verification:
+    If the tap is not detected the test will time out after 10 seconds.
 user: root
 command: evdev_touch_test.py '{{ product }}' -x 1
 flags: also-after-suspend
@@ -30,15 +29,16 @@ category_id: com.canonical.plainbox::touchscreen
 id: ce-oem-touchscreen/evdev/maximum-touch-tap-{{ product_slug }}
 imports: from com.canonical.certification import device
 estimated_duration: 10.0
-_description:
-  PURPOSE:
+_purpose:
     Validate that maximum-touch tap is properly detected
     the maximum finger support is 10 by default
     please modify the TOUCHSCREEN_MAX_FINGERS variable
-  STEPS:
-    Commence the test
-  VERIFICATION:
-     If the tap is not detected the test will time out after 10 seconds.
+_steps:
+    1. Commence the test
+    2. Tap the screen with 10 fingers
+    (Or the maximum supported fingers for this touchscreen)
+_verification:
+    If the tap is not detected the test will time out after 10 seconds.
 user: root
 command:
     VAR_MAX="${TOUCHSCREEN_MAX_FINGERS:-10}"
