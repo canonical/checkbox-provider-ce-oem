@@ -14,6 +14,10 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with Checkbox.  If not, see <http://www.gnu.org/licenses/>.
+#
+# Reference links:
+# https://www.kernel.org/doc/html/v4.18/input/multi-touch-protocol.html
+# https://docs.kernel.org/input/event-codes.html
 
 import argparse
 import time
