@@ -33,6 +33,8 @@ from evdev.ecodes import EV_KEY
 from evdev.ecodes import BTN_TOUCH
 from evdev.ecodes import ABS_X
 from evdev.ecodes import ABS_Y
+from evdev.ecodes import EV_SYN
+from evdev.ecodes import SYN_REPORT
 from evdev.evtest import print_event
 
 
@@ -140,6 +142,20 @@ def capture_events(device, event_queue):
 
 
 def main():
+    """
+    the scripts would capture all touch events to queue by evdev module in background
+    and compare the event one by one once received a SYN_REPORT event
+
+    For the single touch event
+        option 1: a BTN_TOUCH, ABS_X and ABS_Y is required in a event group
+        option 2: ABS_MT_TRACKING_ID, ABS_MT_POSITION_X and ABS_MT_POSITION_Y is required in a event group
+                  the ABS_MT_SLOT event must not exist
+        option 3: ABS_MT_TRACKING_ID, ABS_MT_POSITION_X, ABS_MT_POSITION_Y and ABS_MT_SLOT is required in a event group
+                  only one ABS_MT_SLOT is received and the value of ABS_MT_SLOT event must be 0
+    For the multiple touch event
+        ABS_MT_TRACKING_ID, ABS_MT_POSITION_X, ABS_MT_POSITION_Y and ABS_MT_SLOT is required in a event group
+        the value of ABS_MT_SLOT event must be (tap number - 1)
+    """
 
     args = register_arguments()
     due_time = time.time() + args.timeout
@@ -173,7 +189,7 @@ def main():
             continue
 
         event = event_queue.get_nowait()
-        if event.type == 0 and event.code == 0:
+        if event.type == EV_SYN and event.code == SYN_REPORT:
             detect_state, filter_events = filter_touchscreen_event(events)
             if expected_tap == 1:
                 result = check_single_touch_event(detect_state)
@@ -181,7 +197,9 @@ def main():
                 result = check_multiple_touch_event(detect_state, expected_tap)
 
             # Dump touch events
-            [print_event(ev) for ev in filter_events]
+            for ev in filter_events:
+                print_event(ev)
+
             if result:
                 print(
                     ("\n#### {} touch event "
