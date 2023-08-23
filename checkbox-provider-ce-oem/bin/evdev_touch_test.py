@@ -221,5 +221,4 @@ def main():
 
 
 if __name__ == "__main__":
-    global events
     main()
