@@ -53,17 +53,11 @@ otg_info() {
                 for udc in "${udc_list[@]}"; do
                     
                     # UDC name is include USB node.
-                    if [[ "$udc" == *"$usb_node"* ]]; then
-                        found_udc="$udc"
-                        break
-                    
                     # UDC name is not the same as USB node, but can find USB node under UDC folder.
-                    elif [[ $(find "$device_path" -wholename "*/$udc/$usb_node*") ]]; then
-                        found_udc="$udc"
-                        break
-                    
                     # UDC name is not the same as USB node, but can find UDC folder is under the USB node.
-                    elif [[ $(find "$device_path" -wholename "*$usb_node*/udc/$udc") ]]; then
+                    if [[ "$udc" == *"$usb_node"* ]] ||
+                       [[ $(find "$device_path" -wholename "*/$udc/$usb_node*") ]] ||
+                       [[ $(find "$device_path" -wholename "*$usb_node*/udc/$udc") ]]; then
                         found_udc="$udc"
                         break
                     fi
