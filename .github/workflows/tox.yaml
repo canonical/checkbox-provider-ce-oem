@@ -15,6 +15,10 @@ jobs:
       matrix:
         python: ["3.5", "3.6", "3.8", "3.10"]
     steps:
+      - name: Install debian packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y python3-systemd
       - uses: actions/checkout@v3
       - name: install stable checkbox and checkbox-provider-ce-oem
         run: |
@@ -26,7 +30,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python }}
-      - name: Install tox
+      - name: Install Python dependencies 
         run: pip install tox
       - name: Run tox
         working-directory: /home/runner/checkbox/providers/checkbox-provider-ce-oem/
