@@ -721,13 +721,39 @@ class CPUScalingTest:
 
 
 def probe_governor_module(governor):
-    supportted_governor = ["conservative", "powersave", "ondemand",
-                           "userspace", "performance", "schedutil"]
-    set_module = set(supportted_governor) - set(governor)
-    for module in set_module:
-        module = ("cpufreq_{}".format(module))
-        cmd = ["modprobe", module, "2>/dev/null"]
-        subprocess.run(cmd)
+    expected_governor = ["conservative", "powersave", "ondemand",
+                         "userspace", "performance", "schedutil"]
+    logging.info("Expected governor: %s", expected_governor)
+    logging.info("Current governor: %s", governor)
+    set_module = set(expected_governor) - set(governor)
+    status = 0
+    if set_module:
+        logging.info("Seems like some CPU frequency governors are not"
+                     " supported yet.")
+        logging.info("Starting to probe available CPU frequency governor"
+                     " modules.")
+        for module in set_module:
+            module = ("cpufreq_{}".format(module))
+            logging.info("Attempting to probe %s ...", module)
+            cmd = ["modprobe", module]
+            try:
+                subprocess.run(
+                    cmd,
+                    check=True,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                    encoding="utf-8"
+                )
+                logging.info("Probe module Successfully!")
+            except subprocess.CalledProcessError as err:
+                logging.error(err.stderr)
+                logging.error("Not able to probe %s!", module)
+                status = 1
+    else:
+        logging.info("Seems all expected CPU frequency governors "
+                     "are supported!")
+    return status
 
 
 def main():
@@ -792,8 +818,8 @@ def main():
         return 0
 
     if args.probe_module:
-        probe_governor_module(info.get_supported_governors())
-        return 0
+        status = probe_governor_module(info.get_supported_governors())
+        return status
 
     test = CPUScalingTest(policy=args.policy)
     if args.driver_detect:
