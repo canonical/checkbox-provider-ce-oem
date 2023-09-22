@@ -10,6 +10,7 @@ from systemd import journal
 
 
 RPMSG_ROOT = "/sys/bus/rpmsg/devices"
+SOC_ROOT = "/sys/devices/soc0"
 
 
 def check_rpmsg_device():
@@ -69,7 +70,7 @@ def get_soc_family():
         soc_family (str): SoC family.
     """
     soc_family = ""
-    path = "/sys/devices/soc0/family"
+    path = os.path.join(SOC_ROOT, "family")
     if os.path.isfile(path):
         with open(path, "r") as fp:
             soc_family = fp.read().strip()
@@ -86,7 +87,7 @@ def get_soc_machine():
         soc_machine (str): SoC machine.
     """
     soc_machine = ""
-    path = "/sys/devices/soc0/machine"
+    path = os.path.join(SOC_ROOT, "machine")
     if os.path.isfile(path):
         with open(path, "r") as fp:
             soc_machine = fp.read().strip()
@@ -108,11 +109,10 @@ def detect_arm_processor_type():
 
     if family.find("i.MX") != -1 or machine.find("i.MX") != -1:
         arm_cpu_type = "imx"
+    elif machine.find("Texas Instruments") != -1:
+        arm_cpu_type = "ti"
     else:
-        if machine.find("Texas Instruments") != -1:
-            arm_cpu_type = "ti"
-        else:
-            arm_cpu_type = "unknown"
+        arm_cpu_type = "unknown"
 
     return arm_cpu_type
 
