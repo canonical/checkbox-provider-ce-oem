@@ -116,6 +116,7 @@ class CPUScalingInfo:
         Returns:
             bool: True if the list is printed successfully, False otherwise.
         """
+
         if not self.cpu_policies:
             return False
         for policy in self.cpu_policies:
@@ -719,6 +720,16 @@ class CPUScalingTest:
         self.info.set_governor(self.info.original_governor)
 
 
+def probe_governor_module(governor):
+    supportted_governor = ["conservative", "powersave", "ondemand",
+                           "userspace", "performance", "schedutil"]
+    set_module = set(supportted_governor) - set(governor)
+    for module in set_module:
+        module = ("cpufreq_{}".format(module))
+        cmd = ["modprobe", module, "2>/dev/null"]
+        subprocess.run(cmd)
+
+
 def main():
     """
     Execute the CPU scaling test based on the provided command-line arguments.
@@ -731,6 +742,7 @@ def main():
         --driver-detect: Print the CPU scaling driver.
         --policy: Run the test on a specific CPU policy (default is policy 0).
         --governor: Run a specific governor test.
+        --probe-module: Probe available governor module.
 
     Returns:
         int: The exit code of the test execution, 0 if successful, 1 otherwise.
@@ -763,6 +775,11 @@ def main():
         dest="governor",
         help="Run Specific Governor Test",
     )
+    parser.add_argument(
+        "--probe-module",
+        action="store_true",
+        help="Run Specific Governor Test",
+    )
     args = parser.parse_args()
 
     logger = init_logger()
@@ -772,6 +789,10 @@ def main():
     info = CPUScalingInfo()
     if args.policy_resource:
         info.print_policies_list()
+        return 0
+
+    if args.probe_module:
+        probe_governor_module(info.get_supported_governors())
         return 0
 
     test = CPUScalingTest(policy=args.policy)

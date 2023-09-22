@@ -6,7 +6,9 @@ plugin: resource
 user: root
 category_id: com.canonical.plainbox::cpu
 estimated_duration: 1s
-command: cpufreq_governors.py --policy-resource
+command: 
+    cpufreq_governors.py --probe-module
+    cpufreq_governors.py --policy-resource
 
 id: ce-oem-cpu/cpufreq_driver_detect
 _summary: Detect if the CPU scaling driver exists
