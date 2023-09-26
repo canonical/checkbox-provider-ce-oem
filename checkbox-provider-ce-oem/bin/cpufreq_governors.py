@@ -720,9 +720,7 @@ class CPUScalingTest:
         self.info.set_governor(self.info.original_governor)
 
 
-def probe_governor_module(governor):
-    expected_governor = ["conservative", "powersave", "ondemand",
-                         "userspace", "performance", "schedutil"]
+def probe_governor_module(governor, expected_governor):
     logging.info("Expected governor: %s", expected_governor)
     logging.info("Current governor: %s", governor)
     set_module = set(expected_governor) - set(governor)
@@ -748,7 +746,6 @@ def probe_governor_module(governor):
                 logging.info("Probe module Successfully!")
             except subprocess.CalledProcessError as err:
                 logging.error(err.stderr)
-                logging.error("Not able to probe %s!", module)
                 status = 1
     else:
         logging.info("Seems all expected CPU frequency governors "
@@ -818,7 +815,12 @@ def main():
         return 0
 
     if args.probe_module:
-        status = probe_governor_module(info.get_supported_governors())
+        expected_governor = ["conservative", "powersave", "ondemand",
+                             "userspace", "performance", "schedutil"]
+        status = probe_governor_module(
+            info.get_supported_governors(),
+            expected_governor
+            )
         return status
 
     test = CPUScalingTest(policy=args.policy)
