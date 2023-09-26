@@ -801,7 +801,7 @@ def main():
     parser.add_argument(
         "--probe-module",
         action="store_true",
-        help="Run Specific Governor Test",
+        help="Probe missing cpufreq governors.",
     )
     args = parser.parse_args()
 
@@ -818,7 +818,7 @@ def main():
         expected_governor = ["conservative", "powersave", "ondemand",
                              "userspace", "performance", "schedutil"]
         status = probe_governor_module(
-            info.get_supported_governors(),
+            info.governors,
             expected_governor
             )
         return status
