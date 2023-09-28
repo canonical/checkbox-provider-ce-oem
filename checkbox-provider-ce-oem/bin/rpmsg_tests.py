@@ -48,8 +48,8 @@ def get_rpmsg_channel():
 
     rpmsg_channels = []
     rpmsg_devices = check_rpmsg_device()
-    for file_ojb in rpmsg_devices:
-        tmp_file = os.path.join(RPMSG_ROOT, file_ojb, "dst")
+    for file_obj in rpmsg_devices:
+        tmp_file = os.path.join(RPMSG_ROOT, file_obj, "dst")
         if os.path.isfile(tmp_file):
             with open(tmp_file, "r") as fp:
                 rpmsg_channels.append(fp.read().strip("\n"))
@@ -107,9 +107,9 @@ def detect_arm_processor_type():
     machine = get_soc_machine()
     print("SoC family is {}, machine is {}".format(family, machine))
 
-    if family.find("i.MX") != -1 or machine.find("i.MX") != -1:
+    if "i.MX" in family or "i.MX" in machine:
         arm_cpu_type = "imx"
-    elif machine.find("Texas Instruments") != -1:
+    elif "Texas Instruments" in machine:
         arm_cpu_type = "ti"
     else:
         arm_cpu_type = "unknown"
@@ -141,10 +141,14 @@ def pingpong_test(cpu_type):
     rpmsg_end_pattern = "rpmsg.*: goodbye!"
 
     # Unload module is needed
-    subprocess.getstatusoutput(
-        "lsmod | grep {} && modprobe -r {}".format(
-            kernel_module, kernel_module)
-    )
+    try:
+        subprocess.run(
+            "lsmod | grep {} && modprobe -r {}".format(
+                kernel_module, kernel_module),
+            shell=True
+        )
+    except subprocess.CalledProcessError:
+        pass
 
     rpmsg_channels = get_rpmsg_channel()
 
@@ -157,8 +161,11 @@ def pingpong_test(cpu_type):
 
     start_time = datetime.datetime.now()
     print("# start time: {}".format(start_time))
-    print("# probe pingpong moduel with '{}'".format(probe_cmd))
-    subprocess.getstatusoutput(probe_cmd)
+    print("# probe pingpong module with '{}'".format(probe_cmd))
+    try:
+        subprocess.run(probe_cmd, shell=True)
+    except subprocess.CalledProcessError:
+        pass
 
     pingpong_events = []
     needed_break = False
@@ -179,6 +186,7 @@ def pingpong_test(cpu_type):
                 pingpong_events.append(entry["MESSAGE"])
             elif search_end or (cur_time - start_time).total_seconds() > 60:
                 needed_break = True
+                break
 
         if needed_break:
             break
