@@ -9,10 +9,10 @@ import os
 # This socket unit test is from python package /Lib/test/test_socket.py
 class LinuxKernelCryptoAPI(unittest.TestCase):
     # tests for AF_ALG
-    def create_alg(self, type, name):
+    def create_alg(self, crypto_type, name):
         sock = socket.socket(socket.AF_ALG, socket.SOCK_SEQPACKET, 0)
         try:
-            sock.bind((type, name))
+            sock.bind((crypto_type, name))
         except FileNotFoundError as e:
             # type / algorithm is not available
             sock.close()

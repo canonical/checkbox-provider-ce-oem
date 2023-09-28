@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import argparse
+import ast
 from collections import OrderedDict
 
 
@@ -45,7 +46,7 @@ def check_crypto_driver_priority(type, name, driver_pattern):
         end=""
     )
     if algo_key in crypto_info.keys():
-        print("Yes")
+        print("Passed")
     else:
         print("Failed")
         return False
@@ -58,7 +59,7 @@ def check_crypto_driver_priority(type, name, driver_pattern):
     for priority, drivers in crypto_info[algo_key].items():
         for driver in drivers:
             print("- {}\t\t{}".format(priority, driver))
-            if driver.find(driver_pattern) != -1:
+            if driver_pattern in driver:
                 match_drivers.append(driver)
 
     print(
@@ -66,7 +67,7 @@ def check_crypto_driver_priority(type, name, driver_pattern):
         end=""
     )
     if match_drivers:
-        print("Yes")
+        print("Passed")
     else:
         print("Failed")
         return False
@@ -76,7 +77,7 @@ def check_crypto_driver_priority(type, name, driver_pattern):
 
     print("\n# Checking matched driver is highest priority: ", end="")
     if target_dr:
-        print("Yes")
+        print("Passed")
     else:
         print("Failed")
         result = False
@@ -87,7 +88,8 @@ def check_crypto_driver_priority(type, name, driver_pattern):
 class TestCryptoDriver():
 
     @staticmethod
-    def check_caam_drivers():
+    def check_caam_drivers(crypto_profiles):
+        result = True
         check_list = [
             ("hash", "sha256", "caam"),
             ("skcipher", "cbc(aes)", "caam"),
@@ -95,27 +97,46 @@ class TestCryptoDriver():
             ("rng", "stdrng", "caam")
         ]
 
-        if all([check_crypto_driver_priority(*data) for data in check_list]):
+        check_profiles = crypto_profiles if crypto_profiles else check_list
+        for profile in check_profiles:
+            if not check_crypto_driver_priority(*profile):
+                result = False
+
+        if result:
             print("All CAAM crypto drivers is supported")
         else:
             raise SystemExit("Some CAAM crypto drivers is not supported")
 
     @staticmethod
-    def check_mcrc_drivers():
-        if check_crypto_driver_priority("shash", "crc64", "mcrc"):
+    def check_mcrc_drivers(crypto_profiles):
+        result = True
+        check_list = [("shash", "crc64", "mcrc")]
+
+        check_profiles = crypto_profiles if crypto_profiles else check_list
+        for profile in check_profiles:
+            if not check_crypto_driver_priority(*profile):
+                result = False
+
+        if result:
             print("TI mcrc driver is supported")
         else:
             raise SystemExit("TI mcrc is not supported")
 
     @staticmethod
-    def check_sa2ul_drivers():
+    def check_sa2ul_drivers(crypto_profiles):
+        result = True
         check_list = [
             ("ahash", "sha256", "sa2ul"),
             ("skcipher", "cbc(aes)", "sa2ul"),
             ("aead", "authenc(hmac(sha256),cbc(aes))", "sa2ul")
         ]
 
-        if all([check_crypto_driver_priority(*data) for data in check_list]):
+        check_profiles = crypto_profiles if crypto_profiles else check_list
+        for profile in check_profiles:
+            if not check_crypto_driver_priority(*profile):
+                result = False
+
+        if result:
             print("All SA2UL crypto drivers is supported")
         else:
             raise SystemExit("Some SA2UL crypto drivers is not supported")
@@ -127,10 +148,23 @@ def main():
         "-t",
         "--type",
         choices=["caam", "sa2ul", "mcrc"],
-        help='Validate specific crypto driver module',
+        required=True,
+        help="Validate specific crypto driver module"
+    )
+    parser.add_argument(
+        "-p",
+        "--crypto-profile",
+        type=str,
+        help=(
+            "The expected crypto information with list format."
+            "format: '[('crypto_type', 'crypto_name', 'driver_pattern') ...]'"
+            "e.g. '[('aead', 'gcm(aes)', 'caam'), ('rng', 'stdrng', 'caam')]'"
+        ),
+        default="[]"
     )
     args = parser.parse_args()
-    getattr(TestCryptoDriver, "check_{}_drivers".format(args.type))()
+    func = getattr(TestCryptoDriver, "check_{}_drivers".format(args.type))
+    func(ast.literal_eval(args.crypto_profile))
 
 
 if __name__ == "__main__":
