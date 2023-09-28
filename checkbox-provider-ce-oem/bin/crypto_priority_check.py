@@ -34,27 +34,19 @@ def crypto_info_parser(crypto_raw):
     return crypto_info
 
 
-def check_crypto_driver_priority(type, name, driver_pattern):
-    result = True
-
-    crypto_info = crypto_info_parser(read_crypto_info())
-    algo_key = "{}_{}".format(type, name)
-    print(
-        "\n# Checking AF_ALG {} type with {} algorithm is supported: ".format(
-            type, name
-        ),
-        end=""
-    )
+def check_algo_support(crypto_info, algo_key):
     if algo_key in crypto_info.keys():
         print("Passed")
+        return True
     else:
         print("Failed")
         return False
 
-    match_drivers = []
-    max_priority = max(crypto_info[algo_key].keys())
 
-    print("all supported driver for {} - {}".format(type, name))
+def check_match_drivers(crypto_info, algo_key, driver_pattern):
+    match_drivers = []
+
+    print("all supported driver for {}".format(algo_key))
     print("  Priority\tDriver")
     for priority, drivers in crypto_info[algo_key].items():
         for driver in drivers:
@@ -70,7 +62,28 @@ def check_crypto_driver_priority(type, name, driver_pattern):
         print("Passed")
     else:
         print("Failed")
+
+    return match_drivers
+
+
+def check_crypto_driver_priority(crypto_type, crypto_name, driver_pattern):
+    crypto_info = crypto_info_parser(read_crypto_info())
+    algo_key = "{}_{}".format(crypto_type, crypto_name)
+    print(
+        "\n# Checking AF_ALG {} type with {} algorithm is supported: ".format(
+            crypto_type, crypto_name
+        ),
+        end=""
+    )
+
+    if check_algo_support(crypto_info, algo_key) is False:
         return False
+
+    match_drivers = check_match_drivers(crypto_info, algo_key, driver_pattern)
+    if not match_drivers:
+        return False
+
+    max_priority = max(crypto_info[algo_key].keys())
 
     priority_drivers = crypto_info[algo_key][max_priority]
     target_dr = [dr for dr in match_drivers if dr in priority_drivers]
@@ -78,11 +91,10 @@ def check_crypto_driver_priority(type, name, driver_pattern):
     print("\n# Checking matched driver is highest priority: ", end="")
     if target_dr:
         print("Passed")
+        return True
     else:
         print("Failed")
-        result = False
-
-    return result
+        return False
 
 
 class TestCryptoDriver():
