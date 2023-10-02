@@ -720,10 +720,10 @@ class CPUScalingTest:
         self.info.set_governor(self.info.original_governor)
 
 
-def probe_governor_module(governor, expected_governor):
+def probe_governor_module(actual_governor, expected_governor):
     logging.info("Expected governor: %s", expected_governor)
-    logging.info("Current governor: %s", governor)
-    set_module = set(expected_governor) - set(governor)
+    logging.info("Current governor: %s", actual_governor)
+    set_module = set(expected_governor) - set(actual_governor)
     status = 0
     if set_module:
         logging.info("Seems like some CPU frequency governors are not"
