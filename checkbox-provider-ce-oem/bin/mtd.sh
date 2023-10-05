@@ -11,6 +11,7 @@ listAllMtd() {
 }
 
 countMtd() {
+    # shellcheck disable=SC2126
     count=$( listAllMtd | grep "MTD_NAME" | wc -l )
     if [ "${1}" == "$count" ]; then
         echo "The number of MTD is correct!"
