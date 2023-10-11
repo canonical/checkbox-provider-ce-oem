@@ -1,14 +1,3 @@
-id: ce-oem-cpu/probe_governor_module
-_summary: Probe avaliable governor module
-_description:
-    Probe avaliable gonvernor that built as kerenl module.
-plugin: shell
-user: root
-flags: also-after-suspend
-category_id: com.canonical.plainbox::cpu
-estimated_duration: 1s
-command: cpufreq_governors.py --probe-module
-
 id: cpufreq_policy_list
 _summary: List the cpufreq policies
 _description:

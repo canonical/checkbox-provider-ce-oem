@@ -378,8 +378,7 @@ class CPUScalingTest:
         success = True
         governor = "userspace"
         if governor not in self.info.governors:
-            logging.error("%s governor not supported", governor)
-            return False
+            self.probe_governor_module(governor)
 
         logging.info("Setting governor to %s", governor)
         if not self.info.set_governor(governor):
@@ -435,8 +434,7 @@ class CPUScalingTest:
         success = True
         governor = "performance"
         if governor not in self.info.governors:
-            logging.error("'%s' governor not supported", governor)
-            return False
+            self.probe_governor_module(governor)
 
         logging.info("Setting governor to %s", governor)
         if not self.info.set_governor(governor):
@@ -474,8 +472,7 @@ class CPUScalingTest:
         success = True
         governor = "powersave"
         if governor not in self.info.governors:
-            logging.error("%s governor not supported", governor)
-            return False
+            self.probe_governor_module(governor)
 
         logging.info("Setting governor to %s", governor)
         if not self.info.set_governor(governor):
@@ -515,8 +512,7 @@ class CPUScalingTest:
         success = True
         governor = "ondemand"
         if governor not in self.info.governors:
-            logging.error("%s governor not supported", governor)
-            return False
+            self.probe_governor_module(governor)
 
         logging.info("Setting governor to %s", governor)
         if not self.info.set_governor(governor):
@@ -583,8 +579,7 @@ class CPUScalingTest:
         success = True
         governor = "conservative"
         if governor not in self.info.governors:
-            logging.error("%s governor not supported", governor)
-            return False
+            self.probe_governor_module(governor)
 
         logging.info("Setting governor to %s", governor)
         if not self.info.set_governor(governor):
@@ -651,8 +646,8 @@ class CPUScalingTest:
         success = True
         governor = "schedutil"
         if governor not in self.info.governors:
-            logging.error("%s governor not supported", governor)
-            return False
+            if not self.probe_governor_module(governor):
+                return False
 
         logging.info("Setting governor to %s", governor)
         if not self.info.set_governor(governor):
@@ -719,38 +714,25 @@ class CPUScalingTest:
         )
         self.info.set_governor(self.info.original_governor)
 
-
-def probe_governor_module(actual_governor, expected_governor):
-    logging.info("Expected governor: %s", expected_governor)
-    logging.info("Current governor: %s", actual_governor)
-    set_module = set(expected_governor) - set(actual_governor)
-    status = 0
-    if set_module:
-        logging.info("Seems like some CPU frequency governors are not"
-                     " supported yet.")
-        logging.info("Starting to probe available CPU frequency governor"
-                     " modules.")
-        for module in set_module:
-            module = ("cpufreq_{}".format(module))
-            logging.info("Attempting to probe %s ...", module)
-            cmd = ["modprobe", module]
-            try:
-                subprocess.run(
-                    cmd,
-                    check=True,
-                    stdout=subprocess.PIPE,
-                    stderr=subprocess.PIPE,
-                    text=True,
-                    encoding="utf-8"
-                )
-                logging.info("Probe module Successfully!")
-            except subprocess.CalledProcessError as err:
-                logging.error(err.stderr)
-                status = 1
-    else:
-        logging.info("Seems all expected CPU frequency governors "
-                     "are supported!")
-    return status
+    def probe_governor_module(self, expected_governor):
+        logging.info("Seems CPU frequency governors %s are not"
+                     " supported yet.", expected_governor)
+        module = ("cpufreq_{}".format(expected_governor))
+        logging.info("Attempting to probe %s ...", module)
+        cmd = ["modprobe", module]
+        try:
+            subprocess.run(
+                cmd,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True,
+                encoding="utf-8"
+            )
+            logging.info("Probe module Successfully!")
+        except subprocess.CalledProcessError as err:
+            logging.error(err)
+            logging.error("%s governor not supported", expected_governor)
 
 
 def main():
@@ -798,11 +780,6 @@ def main():
         dest="governor",
         help="Run Specific Governor Test",
     )
-    parser.add_argument(
-        "--probe-module",
-        action="store_true",
-        help="Probe missing cpufreq governors.",
-    )
     args = parser.parse_args()
 
     logger = init_logger()
@@ -813,15 +790,6 @@ def main():
     if args.policy_resource:
         info.print_policies_list()
         return 0
-
-    if args.probe_module:
-        expected_governor = ["conservative", "powersave", "ondemand",
-                             "userspace", "performance", "schedutil"]
-        status = probe_governor_module(
-            info.governors,
-            expected_governor
-            )
-        return status
 
     test = CPUScalingTest(policy=args.policy)
     if args.driver_detect:
