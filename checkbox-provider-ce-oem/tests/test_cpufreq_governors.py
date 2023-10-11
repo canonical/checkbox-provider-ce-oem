@@ -13,59 +13,36 @@ import sys
 import os
 # Add the path to the 'bin' directory for the import to work
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'bin'))
-from cpufreq_governors import probe_governor_module, CPUScalingInfo
+from cpufreq_governors import CPUScalingInfo, CPUScalingTest
 
 
-class TestProbeGovernorModule(unittest.TestCase):
+class TestCPUScalingTest(unittest.TestCase):
     def setUp(self):
-        self.expected_governor = ["conservative", "powersave", "ondemand",
-                                  "userspace", "performance", "schedutil"]
-
-    def test_governor_module_supported(self):
-        # Simulate a scenario where all expected governors are supported
-        governor = ["conservative", "powersave", "ondemand",
-                    "userspace", "performance", "schedutil"]
-        # Simulate a successful modprobe
-        status = probe_governor_module(governor, self.expected_governor)
-        self.assertEqual(status, 0)
+        self.cpu_scaling_test = CPUScalingTest()
 
     @mock.patch('subprocess.run')
-    def test_governor_module_unsupported_and_probe_success(
-            self,
-            mock_subprocess_run
-            ):
-        # Simulate a scenario where some governors are not supported.
-        # And probe module success.
-        # Create a mock subprocess.CompletedProcess object with a
-        # return code of 0
-        governor = ["powersave", "ondemand",
-                    "userspace", "performance", "schedutil"]
+    def test_probe_governor_module_success(self, mock_subprocess_run):
+        # Simulate a scenario governor module probe successfully/
+        governor = "test_governor"
+        status = self.cpu_scaling_test.probe_governor_module(
+            governor
+            )
         mock_subprocess_run.returncode = 0
-        result = probe_governor_module(governor, self.expected_governor)
-
-        self.assertEqual(result, 0)
+        self.assertLogs(status, "Probe module Successfully!")
 
     @mock.patch('subprocess.run')
-    def test_governor_module_unsupported_and_probe_fail(
-            self,
-            mock_subprocess_run
-            ):
-        # Simulate a scenario where some governors are not supported.
-        # And probe module fail.
+    def test_probe_governor_module_fail(self, mock_subprocess_run):
+        # Simulate a scenario where the governors module probed fail.
         # Create a mock subprocess.CompletedProcess object with a
-        # return code of 1
-        governor = ["powersave", "ondemand",
-                    "userspace", "performance", "schedutil"]
-        cmd = ["modprobe", "cpufreq_powersave"]
-        error_message = "Not able to probe cpufreq_conservative!"
+        # return code of SystemError
+        governor = "test_governor"
+        cmd = ["modprobe", governor]
         mock_subprocess_run.side_effect = subprocess.CalledProcessError(
             returncode=1,
             cmd=cmd,
-            stderr=error_message
         )
-        result = probe_governor_module(governor, self.expected_governor)
-
-        self.assertEqual(result, 1)
+        status = self.cpu_scaling_test.probe_governor_module(governor)
+        self.assertLogs(status, "governor not supported")
 
 
 class TestCPUScalingInfo(unittest.TestCase):
