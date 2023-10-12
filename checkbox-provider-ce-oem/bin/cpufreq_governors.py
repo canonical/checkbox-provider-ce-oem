@@ -378,7 +378,8 @@ class CPUScalingTest:
         success = True
         governor = "userspace"
         if governor not in self.info.governors:
-            self.probe_governor_module(governor)
+            if not self.probe_governor_module(governor):
+                return False
 
         logging.info("Setting governor to %s", governor)
         if not self.info.set_governor(governor):
@@ -434,7 +435,8 @@ class CPUScalingTest:
         success = True
         governor = "performance"
         if governor not in self.info.governors:
-            self.probe_governor_module(governor)
+            if not self.probe_governor_module(governor):
+                return False
 
         logging.info("Setting governor to %s", governor)
         if not self.info.set_governor(governor):
@@ -472,7 +474,8 @@ class CPUScalingTest:
         success = True
         governor = "powersave"
         if governor not in self.info.governors:
-            self.probe_governor_module(governor)
+            if not self.probe_governor_module(governor):
+                return False
 
         logging.info("Setting governor to %s", governor)
         if not self.info.set_governor(governor):
@@ -512,7 +515,8 @@ class CPUScalingTest:
         success = True
         governor = "ondemand"
         if governor not in self.info.governors:
-            self.probe_governor_module(governor)
+            if not self.probe_governor_module(governor):
+                return False
 
         logging.info("Setting governor to %s", governor)
         if not self.info.set_governor(governor):
@@ -579,7 +583,8 @@ class CPUScalingTest:
         success = True
         governor = "conservative"
         if governor not in self.info.governors:
-            self.probe_governor_module(governor)
+            if not self.probe_governor_module(governor):
+                return False
 
         logging.info("Setting governor to %s", governor)
         if not self.info.set_governor(governor):
@@ -730,9 +735,11 @@ class CPUScalingTest:
                 encoding="utf-8"
             )
             logging.info("Probe module Successfully!")
+            return True
         except subprocess.CalledProcessError as err:
             logging.error(err)
             logging.error("%s governor not supported", expected_governor)
+            return False
 
 
 def main():
