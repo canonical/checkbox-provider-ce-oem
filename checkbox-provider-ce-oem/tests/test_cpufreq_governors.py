@@ -17,7 +17,10 @@ from cpufreq_governors import CPUScalingInfo, CPUScalingTest
 
 
 class TestCPUScalingTest(unittest.TestCase):
-    def setUp(self):
+    @mock.patch('cpufreq_governors.CPUScalingInfo',
+                return_value=None)
+    def setUp(self, mock_cpuscalinginfo):
+        # Create an instance of CPUScalingInfo
         self.cpu_scaling_test = CPUScalingTest()
 
     @mock.patch('subprocess.run')
@@ -28,7 +31,8 @@ class TestCPUScalingTest(unittest.TestCase):
             governor
             )
         mock_subprocess_run.returncode = 0
-        self.assertLogs(status, "Probe module Successfully!")
+        self.assertLogs("Probe module Successfully!")
+        self.assertTrue(status)
 
     @mock.patch('subprocess.run')
     def test_probe_governor_module_fail(self, mock_subprocess_run):
@@ -42,12 +46,18 @@ class TestCPUScalingTest(unittest.TestCase):
             cmd=cmd,
         )
         status = self.cpu_scaling_test.probe_governor_module(governor)
-        self.assertLogs(status, "governor not supported")
+        self.assertLogs("governor not supported")
+        self.assertFalse(status)
 
 
 class TestCPUScalingInfo(unittest.TestCase):
-    def setUp(self):
+    @mock.patch('cpufreq_governors.CPUScalingInfo.__init__',
+                return_value=None)
+    def setUp(self,
+              mock_init):
+        CPUScalingInfo.__init__ = mock_init
         self.cpu_scaling_info = CPUScalingInfo()
+        self.cpu_scaling_info.sys_cpu_dir = "/sys/devices/system/cpu"
 
     @mock.patch('os.listdir')
     def test_get_cpu_policies_success(self, mock_listdir):
