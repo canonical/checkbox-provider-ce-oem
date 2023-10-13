@@ -721,7 +721,7 @@ class CPUScalingTest:
 
     def probe_governor_module(self, expected_governor):
         logging.info("Seems CPU frequency governors %s are not"
-                     " supported yet.", expected_governor)
+                     " enable yet.", expected_governor)
         module = ("cpufreq_{}".format(expected_governor))
         logging.info("Attempting to probe %s ...", module)
         cmd = ["modprobe", module]
@@ -754,7 +754,6 @@ def main():
         --driver-detect: Print the CPU scaling driver.
         --policy: Run the test on a specific CPU policy (default is policy 0).
         --governor: Run a specific governor test.
-        --probe-module: Probe available governor module.
 
     Returns:
         int: The exit code of the test execution, 0 if successful, 1 otherwise.
