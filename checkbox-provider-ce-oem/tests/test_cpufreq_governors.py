@@ -2,9 +2,11 @@
 
 import unittest
 import subprocess
+import io
+import logging
 from unittest import mock
 """
-We probbley could remove append path while mirge back to ppc.
+We probably could remove append path while mirge back to ppc.
 Since checkbox has __init__.py for unit tests.
 ref:
 https://github.com/canonical/checkbox/blob/main/checkbox-support/checkbox_support/tests/__init__.py
@@ -20,12 +22,15 @@ class TestCPUScalingTest(unittest.TestCase):
     @mock.patch('cpufreq_governors.CPUScalingInfo',
                 return_value=None)
     def setUp(self, mock_cpuscalinginfo):
-        # Create an instance of CPUScalingInfo
+        suppress_text = io.StringIO()
+        sys.stdout = suppress_text
+        logging.disable(logging.CRITICAL)
+        # Create an instance of CPUScalingTest
         self.cpu_scaling_test = CPUScalingTest()
 
     @mock.patch('subprocess.run')
     def test_probe_governor_module_success(self, mock_subprocess_run):
-        # Simulate a scenario governor module probe successfully/
+        # Simulate a scenario governor module probe successfully.
         governor = "test_governor"
         status = self.cpu_scaling_test.probe_governor_module(
             governor
@@ -49,13 +54,22 @@ class TestCPUScalingTest(unittest.TestCase):
         self.assertLogs("governor not supported")
         self.assertFalse(status)
 
+    def tearDown(self):
+        # release stdout
+        sys.stdout = sys.__stdout__
+        logging.disable(logging.NOTSET)
+
 
 class TestCPUScalingInfo(unittest.TestCase):
     @mock.patch('cpufreq_governors.CPUScalingInfo.__init__',
                 return_value=None)
     def setUp(self,
               mock_init):
+        suppress_text = io.StringIO()
+        sys.stdout = suppress_text
+        logging.disable(logging.CRITICAL)
         CPUScalingInfo.__init__ = mock_init
+        # Create an instance of CPUScalingInfo
         self.cpu_scaling_info = CPUScalingInfo()
         self.cpu_scaling_info.sys_cpu_dir = "/sys/devices/system/cpu"
 
@@ -131,6 +145,11 @@ class TestCPUScalingInfo(unittest.TestCase):
             'attribute_name',
             'new_value')
         self.assertFalse(result)
+
+    def tearDown(self):
+        # release stdout
+        sys.stdout = sys.__stdout__
+        logging.disable(logging.NOTSET)
 
 
 if __name__ == '__main__':
