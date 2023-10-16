@@ -1,24 +1,3 @@
-id: ce-oem-crypto/caam/rng-available
-_summary: Check if rng-caam is avaliable.
-plugin: shell
-user: root
-category_id: crypto
-flags: also-after-suspend
-estimated_duration: 1
-requires: manifest.has_caam == 'True'
-imports: from com.canonical.plainbox import manifest
-command:
-    hwrng_path="/sys/class/misc/hw_random/rng_current"
-    echo "Hardware RNG currently using in system is: $(cat $hwrng_path)"
-    if grep -q rng-caam "$hwrng_path"
-    then
-        echo "PASS: rng-caam is available"
-        exit 0
-    else
-        echo "FAIL: rng-caam is unavailable"
-        exit 1
-    fi
-
 id: ce-oem-crypto/caam/caam_hwrng_test
 _summary: Check if CAAM job ring increased after generate random number by using hwrng.
 plugin: shell
@@ -26,7 +5,7 @@ user: root
 category_id: crypto
 flags: also-after-suspend
 estimated_duration: 10
-depends: ce-oem-crypto/caam/rng-available
+depends: ce-oem-crypto/hwrng-current
 command:
     init_interrupt=$(awk '/\.jr/ {printf "%s ",$2;next;}' /proc/interrupts|sed 's/ //g')
     if [ -z "$init_interrupt" ]
@@ -48,6 +27,8 @@ command:
         echo "FAIL: CAAM job ring interrupts didn't increase!"
         exit 1
     fi
+requires: manifest.has_caam == 'True'
+imports: from com.canonical.plainbox import manifest
 
 id: ce-oem-crypto/caam/algo_check
 _summary: Check CAAM algorithm is in the system /proc/crypto
