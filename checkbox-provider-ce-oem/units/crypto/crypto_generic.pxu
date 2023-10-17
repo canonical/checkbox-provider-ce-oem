@@ -108,7 +108,7 @@ command:
     if [ -e "$path_hwrng/rng_selected" ]; then
         echo "HWRNG_Selected: $(cat "$path_hwrng"rng_selected)"
     fi
-    if [ "$HWRNG" == $(cat "$path_hwrng"rng_current) ];then
+    if [ "$HWRNG" == "$(cat "$path_hwrng"rng_current)" ];then
         echo -e "PASS: $HWRNG is available"
         exit 0
     elif [ -z "$HWRNG" ];then
