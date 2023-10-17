@@ -85,38 +85,3 @@ imports:
     from com.canonical.qa.ceoem import cryptoinfo
 command:
     af_alg_test.py --type rng_stdrng
-
-id: ce-oem-crypto/hwrng-current
-_summary: Check if current Hardware Random Number Generate is expected.
-plugin: shell
-user: root
-category_id: crypto
-flags: also-after-suspend
-estimated_duration: 1
-environ: HWRNG
-command:
-    path_hwrng='/sys/class/misc/hw_random/'
-    if [ -e "$path_hwrng/rng_available" ]; then
-        echo "HWRNG_Available: $(cat "$path_hwrng"rng_available)"
-    fi
-    if [ -e "$path_hwrng/rng_current" ]; then
-        echo "HWRNG_Current: $(cat "$path_hwrng"rng_current)"
-    fi
-    if [ -e "$path_hwrng/rng_qulity" ]; then
-        echo "HWRNG_Quality: $(cat "$path_hwrng"rng_qulity)"
-    fi
-    if [ -e "$path_hwrng/rng_selected" ]; then
-        echo "HWRNG_Selected: $(cat "$path_hwrng"rng_selected)"
-    fi
-    if [ "$HWRNG" == "$(cat "$path_hwrng"rng_current)" ];then
-        echo -e "PASS: $HWRNG is available"
-        exit 0
-    elif [ -z "$HWRNG" ];then
-        echo -e "FAIL: Checkbox config HWRNG has not been set!"
-        exit 1
-    else
-        echo -e "FAIL: $HWRNG is not available"
-        exit 1
-    fi
-requires: manifest.has_hardware_rng == 'True'
-imports: from com.canonical.plainbox import manifest

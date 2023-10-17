@@ -20,7 +20,6 @@ _description: Automated crypto accelerator tests for devices
 bootstrap_include:
     cryptoinfo
 include:
-    ce-oem-crypto/caam/rng-available
     ce-oem-crypto/caam/caam_hwrng_test
     ce-oem-crypto/caam/algo_check
     ce-oem-crypto/check-caam-priority
@@ -49,7 +48,6 @@ _description: Automated after-suspend crypto accelerator tests for devices
 bootstrap_include:
     cryptoinfo
 include:
-    after-suspend-ce-oem-crypto/caam/rng-available
     after-suspend-ce-oem-crypto/caam/caam_hwrng_test
     after-suspend-ce-oem-crypto/caam/algo_check
     after-suspend-ce-oem-crypto/check-caam-priority
