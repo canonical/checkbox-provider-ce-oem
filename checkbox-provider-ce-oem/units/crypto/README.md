@@ -4,14 +4,14 @@ This readme provides an overview of the different crypto tests available in this
 
 ## Generic Tests
 
-1. **cryptoinfo**
+### cryptoinfo
    - This resource job retrieves and displays the content of `/proc/crypto`.
 
-2. **ce-oem-crypto/cryptsetup_benchmark**
+### ce-oem-crypto/cryptsetup_benchmark
    - This job assesses cryptographic benchmarking using the `cryptsetup` tool.
    - The primary focus is on the performance of "aes-xts 512b," which is the cipher utilized by Ubuntu Core Full Disk Encryption (FDE).
    - Example
-   '''
+```
     ubuntu@ubuntu:~$ sudo cryptsetup luksDump /dev/mmcblk3p5
     LUKS header information
     Version:        2
@@ -56,35 +56,35 @@ This readme provides an overview of the different crypto tests available in this
                         08 ff a6 52 1a 8d 59 fc 83 f3 fb 68 54 3c 56 d3 
             Digest:     da db 41 09 dc ac e0 3f 9d 56 3b 2e ac 2e 5b 26 
                         54 06 cd ba 58 52 d2 77 e2 31 c3 60 8f 9b 8b b5 
-    '''
-  3. **ce-oem-crypto/af_alg{cipher}**
-  - The AF_ALG related jobs aim to test the kernel crypto API with specific ciphers.
+```
+### ce-oem-crypto/af_alg{cipher}
+The AF_ALG related jobs aim to test the kernel crypto API with specific ciphers.
 
 ## Accelerator Tests
 
-1. **ce-oem-crypto/caam/rng-available**
-- This job verifies the availability of the Cryptographic Acceleration and Assurance Module (CAAM) Hardware Random Number Generator (HWRNG).
+### ce-oem-crypto/caam/rng-available
+This job verifies the availability of the Cryptographic Acceleration and Assurance Module (CAAM) Hardware Random Number Generator (HWRNG).
 
-2. **ce-oem-crypto/caam/caam_hwrng_test**
-- This job tests the CAAM HWRNG for functionality.
+### ce-oem-crypto/caam/caam_hwrng_test
+This job tests the CAAM HWRNG for functionality.
 
-3. **ce-oem-crypto/caam/algo_check**
-- This job checks and validates cryptographic algorithms for the CAAM accelerator.
+### ce-oem-crypto/caam/algo_check
+This job checks and validates cryptographic algorithms for the CAAM accelerator.
 
-4. **ce-oem-crypto/check-caam-priority**
-- This job ensures the proper priority settings for the CAAM accelerator.
+### ce-oem-crypto/check-caam-priority
+This job ensures the proper priority settings for the CAAM accelerator.
 
-5. **ce-oem-crypto/check-mcrc-priority**
-- This job verifies the priority settings for the MCRC accelerator.
+### ce-oem-crypto/check-mcrc-priority
+This job verifies the priority settings for the MCRC accelerator.
 
-6. **ce-oem-crypto/check-sa2ul-priority**
-- This job confirms the priority settings for the SA2UL accelerator.
+### ce-oem-crypto/check-sa2ul-priority
+This job confirms the priority settings for the SA2UL accelerator.
 
-7. **ce-oem-crypto/hwrng-current**
-- This job checks the currently active Hardware Random Number Generator (HWRNG), ensuring it aligns with expectations. The job's execution depends on the `HWRNG` checkbox configuration variable.
-- Example:
-  '''
+### ce-oem-crypto/hwrng-current
+This job checks the currently active Hardware Random Number Generator (HWRNG), ensuring it aligns with expectations. The job's execution depends on the `HWRNG` checkbox configuration variable.
+- Example
+  ```
   HWRNG = rng-caam
-  # or
+  or
   HWRNG = hwrng-hse
-  '''
+  ```
