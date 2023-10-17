@@ -87,7 +87,7 @@ command:
     af_alg_test.py --type rng_stdrng
 
 id: ce-oem-crypto/hwrng-current
-_summary: Check if current Hardward Random Number Generate is expected.
+_summary: Check if current Hardware Random Number Generate is expected.
 plugin: shell
 user: root
 category_id: crypto
