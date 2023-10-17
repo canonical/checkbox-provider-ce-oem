@@ -23,13 +23,13 @@ command:
         echo "HWRNG_Selected: $(cat "$path_hwrng"rng_selected)"
     fi
     if [ -z "$HWRNG" ];then
-        echo -e "FAIL: Checkbox config HWRNG has not been set!"
+        echo "FAIL: Checkbox config HWRNG has not been set!"
         exit 1
     elif [ "$HWRNG" == "$(cat "$path_hwrng"rng_current)" ];then
-        echo -e "PASS: $HWRNG is available"
+        echo "PASS: $HWRNG is available"
         exit 0
     else
-        echo -e "FAIL: $HWRNG is not available"
+        echo "FAIL: $HWRNG is not available"
         exit 1
     fi
 
@@ -41,6 +41,8 @@ category_id: crypto
 flags: also-after-suspend
 estimated_duration: 10
 depends: ce-oem-crypto/hwrng-current
+requires: manifest.has_caam == 'True'
+imports: from com.canonical.plainbox import manifest
 command:
     init_interrupt=$(awk '/\.jr/ {printf "%s ",$2;next;}' /proc/interrupts|sed 's/ //g')
     if [ -z "$init_interrupt" ]
@@ -62,8 +64,6 @@ command:
         echo "FAIL: CAAM job ring interrupts didn't increase!"
         exit 1
     fi
-requires: manifest.has_caam == 'True'
-imports: from com.canonical.plainbox import manifest
 
 id: ce-oem-crypto/caam/algo_check
 _summary: Check CAAM algorithm is in the system /proc/crypto
