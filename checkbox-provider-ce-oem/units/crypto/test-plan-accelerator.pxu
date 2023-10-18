@@ -25,6 +25,7 @@ include:
     ce-oem-crypto/check-caam-priority
     ce-oem-crypto/check-mcrc-priority
     ce-oem-crypto/check-sa2ul-priority
+    ce-oem-crypto/hwrng-current
 
 id: after-suspend-ce-oem-accelerator-full
 unit: test plan
@@ -53,3 +54,4 @@ include:
     after-suspend-ce-oem-crypto/check-caam-priority
     after-suspend-ce-oem-crypto/check-mcrc-priority
     after-suspend-ce-oem-crypto/check-sa2ul-priority
+    after-suspend-ce-oem-crypto/hwrng-current

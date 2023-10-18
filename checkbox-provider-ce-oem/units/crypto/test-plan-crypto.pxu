@@ -26,7 +26,6 @@ include:
     ce-oem-crypto/af_alg_aead_gcm_aes_test
     ce-oem-crypto/af_alg_skcipher_cbc_aes_test
     ce-oem-crypto/af_alg_rng_stdrng_test
-    ce-oem-crypto/hwrng-current
 
 id: after-suspend-ce-oem-crypto-full
 unit: test plan
@@ -56,4 +55,3 @@ include:
     after-suspend-ce-oem-crypto/af_alg_aead_gcm_aes_test
     after-suspend-ce-oem-crypto/af_alg_skcipher_cbc_aes_test
     after-suspend-ce-oem-crypto/af_alg_rng_stdrng_test
-    after-suspend-ce-oem-crypto/hwrng-current
