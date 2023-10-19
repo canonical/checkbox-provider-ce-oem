@@ -62,9 +62,6 @@ The AF_ALG related jobs aim to test the kernel crypto API with specific ciphers.
 
 ## Accelerator Tests
 
-### ce-oem-crypto/caam/rng-available
-This job verifies the availability of the Cryptographic Acceleration and Assurance Module (CAAM) Hardware Random Number Generator (HWRNG).
-
 ### ce-oem-crypto/caam/caam_hwrng_test
 This job tests the CAAM HWRNG for functionality.
 
