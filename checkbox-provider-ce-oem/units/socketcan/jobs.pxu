@@ -1,0 +1,55 @@
+unit: template
+template-resource: com.canonical.certification::device
+template-filter: device.category == 'SOCKETCAN'
+id: socketcan/stress_fd_remote_{interface}
+_summary: Send stress test through CAN device {interface} (Raw, Remote, FD)
+_description:
+    Test a CAN device by sending packets using a raw socket to a remote device.
+    As a prerequisite the remote device should have can-echo-server installed so
+    as to return the predicted packet.
+category_id: com.canonical.certification::socketcan
+plugin: shell
+user: root
+estimated_duration: 10m
+flags: also-after-suspend
+imports: from com.canonical.plainbox import manifest
+requires:
+    manifest.socket_can_echo_server_running == 'True'
+    socket_can_fd == 'True'
+command:
+    BASH_XTRACEFD=1
+    set -ex
+    ip link set {interface} down
+    # Following command is only supported configuration method when using the
+    # IXXAT driver from HMS
+    ip link set {interface} type can bitrate 1000000 dbitrate 2000000 fd on
+    ip link set {interface} up
+    socketcan_test.py -d {interface} -f client -x stress-echo -l 100000 -c 123
+
+unit: template
+template-resource: com.canonical.certification::device
+template-filter: device.category == 'SOCKETCAN'
+id: socketcan/stress_remote_{interface}
+_summary: Send stress test through CAN device {interface} (Raw, Remote)
+_description:
+    Test a CAN device by sending packets using a raw socket to a remote device.
+    As a prerequisite the remote device should have can-echo-server installed so
+    as to return the predicted packet.
+category_id: com.canonical.certification::socketcan
+plugin: shell
+user: root
+estimated_duration: 10m
+flags: also-after-suspend
+imports: from com.canonical.plainbox import manifest
+requires:
+    manifest.socket_can_echo_server_running == 'True'
+command:
+    BASH_XTRACEFD=1
+    set -ex
+    ip link set {interface} down
+    # Following command is only supported configuration method when using the
+    # IXXAT driver from HMS
+    ip link set {interface} type can bitrate 1000000
+    ip link set dev {interface} mtu 16
+    ip link set {interface} up
+    socketcan_test.py -d {interface} client -x stress-echo -l 100000 -c 123
