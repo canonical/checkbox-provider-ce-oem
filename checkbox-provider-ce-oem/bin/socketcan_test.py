@@ -93,25 +93,23 @@ class CANSocket():
             self.sock.setsockopt(
                 socket.SOL_CAN_RAW, self.CAN_RAW_FD_FRAMES, 1)
 
-    def struct_packet(self, can_id, data, id_flag=0, fd_flag=0):
+    def struct_packet(
+            self, can_id, data, id_flag=0, fd_flag=0, fd_frame=False):
         """
         Generate CAN frame binary data
 
         Args:
             can_id (int):   CAN ID
             data (byte):    CAN data packet
-            id_flag:
+            id_flag (int):  CAN ID flag
             fd_flag (int):  additional FD flag
-
-        can_id (int):       CAN ID
-        data (byte):        Random data with byte format
-        eff_flag (int):     CAN ID Flag. 0 means SFF, 1 means EFF
+            fd_frame (bol): FD frame data
 
         Raises:
             SystemExit: if any error occurs during receiving CAN frame
         """
         can_id = can_id | id_flag
-        if self._fdmode:
+        if fd_frame:
             can_packet = struct.pack(
                 self.FD_FORMAT,
                 can_id,
@@ -202,32 +200,6 @@ class CANSocket():
                 raise SystemExit('ERROR: OSError on attempt to receive')
 
 
-def send_string_back(sender, can_id, data, eff_flag):
-    """
-    Start CAN Echo server
-
-    Args:
-        sender (obj):       CANSocket object
-        can_id (int):       CAN ID
-        data (byte):        Random data with byte format
-        eff_flag (int):     CAN ID Flag. 0 means SFF, 1 means EFF
-
-    Raises:
-        SystemExit: if any error occurs during send CAN frame
-    """
-    logging.info('Echo data back...')
-    try:
-        can_pkt = sender.struct_packet(can_id, data, eff_flag)
-        sender.send(can_pkt)
-    except OSError as e:
-        logging.error(e)
-        if e.errno == 90:
-            raise SystemExit(
-                'ERROR: interface does not support FD Mode')
-        else:
-            raise SystemExit('ERROR: OSError on attempt to send')
-
-
 def start_echo_server(interface, fd_mode, delay=0.001):
     """
     Start CAN Echo server
@@ -253,22 +225,18 @@ def start_echo_server(interface, fd_mode, delay=0.001):
             id_flags = 0
 
         client_fd_mode = True if len(recv_data) == 64 else False
-        if client_fd_mode is False and client_fd_mode != fd_mode:
-            # Switch to FD frame to 0 to support classic CAN
-            can_socket.sock.setsockopt(
-                socket.SOL_CAN_RAW, can_socket.CAN_RAW_FD_FRAMES, 0
-            )
-            send_string_back(
-                can_socket, recv_id, recv_data, id_flags
-            )
-            # Switch to FD frame to 1 to support FD CAN
-            can_socket.sock.setsockopt(
-                socket.SOL_CAN_RAW, can_socket.CAN_RAW_FD_FRAMES, 1
-            )
-        else:
-            send_string_back(
-                can_socket, recv_id, recv_data, id_flags
-            )
+        logging.info('Echo data back...')
+        try:
+            can_pkt = can_socket.struct_packet(
+                recv_id, recv_data, id_flags, fd_frame=client_fd_mode)
+            can_socket.send(can_pkt)
+        except OSError as e:
+            logging.error(e)
+            if e.errno == 90:
+                raise SystemExit(
+                    'ERROR: interface does not support FD Mode')
+            else:
+                raise SystemExit('ERROR: OSError on attempt to send')
 
 
 def _random_can_data(can_id, eff_flag, data_size):
@@ -322,7 +290,8 @@ def echo_test(interface, can_id, eff_flag, fd_mode):
     recv_id = recv_data = None
 
     can_socket = CANSocket(interface, fd_mode)
-    can_pkt = can_socket.struct_packet(can_id_i, data_b, id_flags, fd_mode)
+    can_pkt = can_socket.struct_packet(
+        can_id_i, data_b, id_flags, fd_frame=fd_mode)
     can_socket.send(can_pkt, timeout=5)
 
     can_recv_pkt = can_socket.recv(5)
@@ -367,7 +336,7 @@ def stress_echo_test(interface, can_id, eff_flag, fd_mode, count=30):
                     str(int(datetime.datetime.now().timestamp()*1000000)))
             ]),
             id_flags,
-            fd_mode
+            fd_frame=fd_mode
         ) for _ in range(count)
     ]
 
