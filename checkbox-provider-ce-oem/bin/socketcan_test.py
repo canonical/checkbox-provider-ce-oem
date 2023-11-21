@@ -2,11 +2,11 @@ import argparse
 import ctypes
 import os
 import socket
-import struct
 import sys
 import time
 import datetime
 import logging
+from socketcan_socket import CANSocket, prepare_can_link
 
 
 def init_logger():
@@ -37,167 +37,6 @@ def init_logger():
     root_logger.addHandler(stdout_handler)
 
     return root_logger
-
-
-class CANSocket():
-
-    # struct module format strings for CAN packets
-    # Normal format:
-    #   <   little-endian
-    #   I   unsigned int (4)    : CAN-ID + EFF/RTR/ERR Flags
-    #   B   unsigned char (1)   : Data length
-    #   3x  padding (3 * 1)     : -
-    #   8s  char array (8 * 1)  : Data
-    FORMAT = "<IB3x8s"
-    # Flexible Data (FD) rate format:
-    #   <    little-endian
-    #   I    unsigned int (4)    : CAN-ID + EFF/RTR/ERR Flags
-    #   B    unsigned char (1)   : Data length
-    #   B    unsigned char (1)   : FD Flags
-    #   2x   padding (2 * 1)     : -
-    #   64s  char array (64 * 1) : Data
-    FD_FORMAT = "<IBB2x64s"
-
-    CAN_MTU = struct.Struct(FORMAT).size
-    CANFD_MTU = struct.Struct(FD_FORMAT).size
-
-    # Socket options from <linux/can/raw.h>
-    CAN_RAW_FILTER = 1         # set 0 .. n can_filter(s)
-    CAN_RAW_ERR_FILTER = 2     # set filter for error frames
-    CAN_RAW_LOOPBACK = 3       # local loopback (default:on)
-    CAN_RAW_RECV_OWN_MSGS = 4  # receive my own msgs (default:off)
-    CAN_RAW_FD_FRAMES = 5      # allow CAN FD frames (default:off)
-    CAN_RAW_JOIN_FILTERS = 6   # all filters must match to trigger
-
-    def __init__(self, interface=None, fdmode=False, verbose=False):
-        self.sock = socket.socket(socket.PF_CAN,  # protocol family
-                                  socket.SOCK_RAW,
-                                  socket.CAN_RAW)
-        self._fdmode = fdmode
-        self._verbose = verbose
-        if interface is not None:
-            self._bind(interface)
-
-    def __enter__(self):
-        return self
-
-    def __exit__(self):
-        self.close()
-
-    def close(self):
-        self.sock.close()
-
-    def _bind(self, interface):
-        self.sock.bind((interface,))
-        if self._fdmode:  # default is off
-            self.sock.setsockopt(
-                socket.SOL_CAN_RAW, self.CAN_RAW_FD_FRAMES, 1)
-
-    def struct_packet(
-            self, can_id, data, id_flag=0, fd_flag=0, fd_frame=False):
-        """
-        Generate CAN frame binary data
-
-        Args:
-            can_id (int):   CAN ID
-            data (byte):    CAN data packet
-            id_flag (int):  CAN ID flag
-            fd_flag (int):  additional FD flag
-            fd_frame (bol): FD frame data
-
-        Raises:
-            SystemExit: if any error occurs during receiving CAN frame
-        """
-        can_id = can_id | id_flag
-        if fd_frame:
-            can_packet = struct.pack(
-                self.FD_FORMAT,
-                can_id,
-                len(data),
-                fd_flag,
-                data
-            )
-        else:
-            can_packet = struct.pack(
-                self.FORMAT,
-                can_id,
-                len(data),
-                data
-            )
-
-        return can_packet
-
-    def destruct_packet(self, can_packet):
-        nbytes = len(can_packet)
-        logging.debug("Destruct CAN packet..")
-        if nbytes == self.CANFD_MTU:
-            logging.debug("Got CAN FD frame..")
-            can_id, length, fd_flags, data = struct.unpack(
-                    self.FD_FORMAT, can_packet)
-        elif nbytes == self.CAN_MTU:
-            logging.debug("Got Classical CAN frame..")
-            can_id, length, data = struct.unpack(
-                    self.FORMAT, can_packet)
-        else:
-            logging.error("Got an unexpected data with length %s", nbytes)
-            return (None, None)
-
-        can_id &= socket.CAN_EFF_MASK
-        if can_id and data[:length] and self._verbose:
-            logging.debug('CAN packet data')
-            logging.debug('  ID  : %s', '{:x}'.format(can_id))
-            logging.debug('  Data: %s', data[:length].hex())
-
-        return (can_id, data[:length])
-
-    def send(self, can_packet, timeout=None):
-        """
-        Send CAN frame data through CANSocket
-
-        Args:
-            can_packet (): CAN data packet
-            timeout:
-
-        Raises:
-            SystemExit: if any error occurs during receiving CAN frame
-        """
-        try:
-            if timeout:
-                self.sock.settimeout(timeout)
-            self.sock.send(can_packet)
-            self.sock.settimeout(None)
-        except OSError as e:
-            logging.error(e)
-            if e.errno == 90:
-                raise SystemExit(
-                    'ERROR: interface does not support FD Mode')
-            else:
-                raise SystemExit('ERROR: OSError on attempt to send')
-
-    def recv(self, timeout=None):
-        """
-        Receive data from CANSocket
-
-        Raises:
-            SystemExit: if any error occurs during receiving CAN frame
-        """
-        data_struct = self.CANFD_MTU if self._fdmode else self.CAN_MTU
-        try:
-            if timeout:
-                self.sock.settimeout(timeout)
-            can_pkt = self.sock.recv(data_struct)
-            self.sock.settimeout(None)
-            return can_pkt
-        except TimeoutError:
-            logging.error("Failed to receive within %ss", 5)
-            return None
-        except OSError as e:
-            logging.error(e)
-            if e.errno == 90:
-                raise SystemExit(
-                    'ERROR: interface does not support FD Mode')
-            else:
-                raise SystemExit('ERROR: OSError on attempt to receive')
 
 
 def start_echo_server(interface, fd_mode, delay=0.001):
@@ -288,19 +127,20 @@ def echo_test(interface, can_id, eff_flag, fd_mode):
     logging.info('Sending data: %s', data_b.hex())
 
     recv_id = recv_data = None
+    logging.info("Initial CAN Link object with %s", interface)
+    with prepare_can_link(interface, fd_mode):
+        can_socket = CANSocket(interface, fd_mode)
+        can_pkt = can_socket.struct_packet(
+            can_id_i, data_b, id_flags, fd_frame=fd_mode)
+        can_socket.send(can_pkt, timeout=5)
 
-    can_socket = CANSocket(interface, fd_mode)
-    can_pkt = can_socket.struct_packet(
-        can_id_i, data_b, id_flags, fd_frame=fd_mode)
-    can_socket.send(can_pkt, timeout=5)
+        can_recv_pkt = can_socket.recv(5)
+        recv_id, recv_data = can_socket.destruct_packet(can_recv_pkt)
 
-    can_recv_pkt = can_socket.recv(5)
-    recv_id, recv_data = can_socket.destruct_packet(can_recv_pkt)
-
-    if recv_id != can_id_i or recv_data != data_b:
-        raise SystemExit('ERROR: ID/Data received does not match sent')
-    else:
-        logging.info('\nPASSED')
+        if recv_id != can_id_i or recv_data != data_b:
+            raise SystemExit('ERROR: ID/Data received does not match sent')
+        else:
+            logging.info('\nPASSED')
 
 
 def stress_echo_test(interface, can_id, eff_flag, fd_mode, count=30):
@@ -324,76 +164,79 @@ def stress_echo_test(interface, can_id, eff_flag, fd_mode, count=30):
     can_id_i, prefix_data, id_flags = _random_can_data(
                         can_id, eff_flag, data_size)
 
-    can_socket = CANSocket(interface, fd_mode)
+    logging.info("Initial CAN Link object with %s", interface)
+    with prepare_can_link(interface, fd_mode):
+        can_socket = CANSocket(interface, fd_mode)
 
-    logging.info("Generate data for stress tests")
-    original_records = [
-        can_socket.struct_packet(
-            can_id_i,
-            b"".join([
-                prefix_data,
-                bytes.fromhex(
-                    str(int(datetime.datetime.now().timestamp()*1000000)))
-            ]),
-            id_flags,
-            fd_frame=fd_mode
-        ) for _ in range(count)
-    ]
+        logging.info("Generate data for stress tests")
+        original_records = [
+            can_socket.struct_packet(
+                can_id_i,
+                b"".join([
+                    prefix_data,
+                    bytes.fromhex(
+                        str(int(datetime.datetime.now().timestamp()*1000000)))
+                ]),
+                id_flags,
+                fd_frame=fd_mode
+            ) for _ in range(count)
+        ]
 
-    time_format = "%Y-%m-%d %H:%M:%S"
-    recv_records = []
+        time_format = "%Y-%m-%d %H:%M:%S"
+        recv_records = []
 
-    start_time = datetime.datetime.now()
-    logging.info(
-        "# Start stress echo string test at %s",
-        start_time.strftime(time_format)
-    )
-    for can_pkt in original_records:
-        can_socket.send(can_pkt, timeout=5)
-        recv_records.append(can_socket.recv(5))
-        if recv_records[-1] is None:
-            logging.error(
-                "Stop testing due to failed to receive packet"
-            )
-            logging.error(
-                "Received %d packets from CAN echo server",
-                len(recv_records)
-            )
-            raise SystemExit("CAN ECHO Stress test failed")
-
-    end_time = datetime.datetime.now()
-    logging.info("# End stress echo string test at {}".format(
-        end_time.strftime(time_format)
-    ))
-
-    elapsed_time = end_time - start_time
-    logging.info("received %s frames in %s", len(recv_records), elapsed_time)
-
-    if len(recv_records) == count:
-        logging.info("# Checking the data in received frames")
-        failed_count = 0
-        for index, data in enumerate(original_records):
-            # validate data field in CAN packet only
-            if can_socket.destruct_packet(recv_records[index]) != \
-               can_socket.destruct_packet(data):
-                failed_count += 1
-                logging.error("Received data in unexpected!")
-                logging.error("Received data: %s", recv_records[index])
-                logging.error("Expected data: %s", data)
-
-        if failed_count > 0:
-            logging.error("Found %s incorrect data frames", failed_count)
-            raise SystemExit("CAN ECHO Stress test failed")
-        else:
-            logging.info("CAN ECHO Stress test passed")
-
-    else:
-        logging.error(
-            "%s frames is received, but %s is expected",
-            len(recv_records),
-            count
+        start_time = datetime.datetime.now()
+        logging.info(
+            "# Start stress echo string test at %s",
+            start_time.strftime(time_format)
         )
-        raise SystemExit("CAN ECHO Stress test failed")
+        for can_pkt in original_records:
+            can_socket.send(can_pkt, timeout=5)
+            recv_records.append(can_socket.recv(5))
+            if recv_records[-1] is None:
+                logging.error(
+                    "Stop testing due to failed to receive packet"
+                )
+                logging.error(
+                    "Received %d packets from CAN echo server",
+                    len(recv_records)
+                )
+                raise SystemExit("CAN ECHO Stress test failed")
+
+        end_time = datetime.datetime.now()
+        logging.info("# End stress echo string test at {}".format(
+            end_time.strftime(time_format)
+        ))
+
+        elapsed_time = end_time - start_time
+        logging.info(
+            "received %s frames in %s", len(recv_records), elapsed_time)
+
+        if len(recv_records) == count:
+            logging.info("# Checking the data in received frames")
+            failed_count = 0
+            for index, data in enumerate(original_records):
+                # validate data field in CAN packet only
+                if can_socket.destruct_packet(recv_records[index]) != \
+                   can_socket.destruct_packet(data):
+                    failed_count += 1
+                    logging.error("Received data in unexpected!")
+                    logging.error("Received data: %s", recv_records[index])
+                    logging.error("Expected data: %s", data)
+
+            if failed_count > 0:
+                logging.error("Found %s incorrect data frames", failed_count)
+                raise SystemExit("CAN ECHO Stress test failed")
+            else:
+                logging.info("CAN ECHO Stress test passed")
+
+        else:
+            logging.error(
+                "%s frames is received, but %s is expected",
+                len(recv_records),
+                count
+            )
+            raise SystemExit("CAN ECHO Stress test failed")
 
 
 def register_arguments():
