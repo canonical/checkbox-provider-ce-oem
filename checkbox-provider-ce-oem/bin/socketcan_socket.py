@@ -3,7 +3,6 @@ import struct
 import sys
 import json
 import subprocess
-import copy
 import logging
 import contextlib
 from enum import Enum

@@ -62,7 +62,6 @@ def monitor_can_state(can_link, expected_states, timeout):
             break
         cur_time = datetime.now()
 
-
         if (cur_time - start_time).total_seconds() > timeout:
             logging.error("CAN current state is not match")
             break
@@ -113,8 +112,7 @@ def can_bus_off_test(can_dev, timeout):
             for _ in range(10):
                 can_socket.send(can_pkt, timeout=5)
 
-            if monitor_can_state(
-                can_link, [CANLinkState.BUS_OFF], timeout):
+            if monitor_can_state(can_link, [CANLinkState.BUS_OFF], timeout):
                 print("The state of {} interface is BUS-OFF".format(can_dev))
 
                 print("Remove short connector from {} intf".format(can_dev))
