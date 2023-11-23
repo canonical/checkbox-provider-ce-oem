@@ -15,7 +15,7 @@ flags: also-after-suspend
 imports: from com.canonical.plainbox import manifest
 requires:
     manifest.socket_can_echo_server_running == 'True'
-    socket_can_fd == 'True'
+    manifest.has_socket_can_fd == 'True'
 command:
     socketcan_test.py -d {interface} -f client -x stress-echo -l 100000 -c 123
 

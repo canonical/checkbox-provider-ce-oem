@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import argparse
 import ctypes
 import os
@@ -48,34 +50,35 @@ def start_echo_server(interface, fd_mode, delay=0.001):
         fd_mode (bool):     FD mode enable
         delay (float):      The time delay before echo CAN frame
     """
-
-    logging.info('Start SocketCAN echo server')
-    can_socket = CANSocket(interface, fd_mode)
-    while True:
-        recv_pkt = can_socket.recv()
-        recv_id, recv_data = can_socket.destruct_packet(recv_pkt)
-        logging.info('Received packet')
-        logging.info('  ID  : %s', '{:x}'.format(recv_id))
-        logging.info('  Data: %s', recv_data.hex())
-        time.sleep(delay)
-        if recv_id > 2047:
-            id_flags = socket.CAN_EFF_FLAG
-        else:
-            id_flags = 0
-
-        client_fd_mode = True if len(recv_data) == 64 else False
-        logging.info('Echo data back...')
-        try:
-            can_pkt = can_socket.struct_packet(
-                recv_id, recv_data, id_flags, fd_frame=client_fd_mode)
-            can_socket.send(can_pkt)
-        except OSError as e:
-            logging.error(e)
-            if e.errno == 90:
-                raise SystemExit(
-                    'ERROR: interface does not support FD Mode')
+    logging.info("Initial CAN Link object with %s", interface)
+    with prepare_can_link(interface, fd_mode):
+        logging.info('Start SocketCAN echo server')
+        can_socket = CANSocket(interface, fd_mode)
+        while True:
+            recv_pkt = can_socket.recv()
+            recv_id, recv_data = can_socket.destruct_packet(recv_pkt)
+            logging.info('Received packet')
+            logging.info('  ID  : %s', '{:x}'.format(recv_id))
+            logging.info('  Data: %s', recv_data.hex())
+            time.sleep(delay)
+            if recv_id > 2047:
+                id_flags = socket.CAN_EFF_FLAG
             else:
-                raise SystemExit('ERROR: OSError on attempt to send')
+                id_flags = 0
+
+            client_fd_mode = True if len(recv_data) == 64 else False
+            logging.info('Echo data back...')
+            try:
+                can_pkt = can_socket.struct_packet(
+                    recv_id, recv_data, id_flags, fd_frame=client_fd_mode)
+                can_socket.send(can_pkt)
+            except OSError as e:
+                logging.error(e)
+                if e.errno == 90:
+                    raise SystemExit(
+                        'ERROR: interface does not support FD Mode')
+                else:
+                    raise SystemExit('ERROR: OSError on attempt to send')
 
 
 def _random_can_data(can_id, eff_flag, data_size):
@@ -220,7 +223,7 @@ def stress_echo_test(interface, can_id, eff_flag, fd_mode, count=30):
                 if can_socket.destruct_packet(recv_records[index]) != \
                    can_socket.destruct_packet(data):
                     failed_count += 1
-                    logging.error("Received data in unexpected!")
+                    logging.error("Received data is unexpected!")
                     logging.error("Received data: %s", recv_records[index])
                     logging.error("Expected data: %s", data)
 
