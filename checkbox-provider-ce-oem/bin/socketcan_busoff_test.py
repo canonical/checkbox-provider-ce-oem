@@ -141,8 +141,9 @@ def register_arguments():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description='SocketCAN BUS-OFF Tests')
     parser.add_argument(
-        "-d", "--dev",
-        required=True
+        "-d", "--device",
+        required=True,
+        help="CAN network interface"
     )
     parser.add_argument(
         "-t", "--timeout",

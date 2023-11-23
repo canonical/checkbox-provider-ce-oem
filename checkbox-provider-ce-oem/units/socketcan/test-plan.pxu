@@ -1,7 +1,7 @@
 id: ce-oem-socketcan-full
 unit: test plan
 _name: SocketCAN remote test
-_description: RS485 remote tests for devices
+_description: SocketCAN remote tests for devices
 include:
 nested_part:
     ce-oem-socketcan-manual

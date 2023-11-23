@@ -111,6 +111,19 @@ def _random_can_data(can_id, eff_flag, data_size):
     return can_id_int, data_bytes, id_flag
 
 
+def _validate_packet_data(socket_obj, src_packet, recv_packet):
+
+    if socket_obj.destruct_packet(recv_packet) != \
+       socket_obj.destruct_packet(src_packet):
+
+        logging.error("Received data is unexpected!")
+        logging.error("Received data: %s", recv_packet)
+        logging.error("Expected data: %s", src_packet)
+
+        return False
+    return True
+
+
 def echo_test(interface, can_id, eff_flag, fd_mode):
     """
     Perform the echo test through SocketCAN bus
@@ -128,8 +141,6 @@ def echo_test(interface, can_id, eff_flag, fd_mode):
     can_id_i, data_b, id_flags = _random_can_data(
                         can_id, eff_flag, data_size)
     logging.info('Sending data: %s', data_b.hex())
-
-    recv_id = recv_data = None
     logging.info("Initial CAN Link object with %s", interface)
     with prepare_can_link(interface, fd_mode):
         can_socket = CANSocket(interface, fd_mode)
@@ -138,12 +149,12 @@ def echo_test(interface, can_id, eff_flag, fd_mode):
         can_socket.send(can_pkt, timeout=5)
 
         can_recv_pkt = can_socket.recv(5)
-        recv_id, recv_data = can_socket.destruct_packet(can_recv_pkt)
 
-        if recv_id != can_id_i or recv_data != data_b:
-            raise SystemExit('ERROR: ID/Data received does not match sent')
-        else:
+        if _validate_packet_data(can_socket, can_pkt,
+                                 can_recv_pkt):
             logging.info('\nPASSED')
+        else:
+            raise SystemExit('ERROR: ID/Data received does not match sent')
 
 
 def stress_echo_test(interface, can_id, eff_flag, fd_mode, count=30):
@@ -220,12 +231,9 @@ def stress_echo_test(interface, can_id, eff_flag, fd_mode, count=30):
             failed_count = 0
             for index, data in enumerate(original_records):
                 # validate data field in CAN packet only
-                if can_socket.destruct_packet(recv_records[index]) != \
-                   can_socket.destruct_packet(data):
+                if _validate_packet_data(can_socket, data,
+                                         recv_records[index]):
                     failed_count += 1
-                    logging.error("Received data is unexpected!")
-                    logging.error("Received data: %s", recv_records[index])
-                    logging.error("Expected data: %s", data)
 
             if failed_count > 0:
                 logging.error("Found %s incorrect data frames", failed_count)
@@ -247,8 +255,9 @@ def register_arguments():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         description='SocketCAN Tests')
     parser.add_argument(
-        "-d", "--dev",
-        required=True
+        "-d", "--device",
+        required=True,
+        help="CAN network interface"
     )
     parser.add_argument(
         "-f", "--fd-mode",

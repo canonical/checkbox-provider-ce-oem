@@ -104,8 +104,8 @@ class CANSocket():
             fd_flag (int):  additional FD flag
             fd_frame (bol): FD frame data
 
-        Raises:
-            SystemExit: if any error occurs during receiving CAN frame
+        Return:
+            can_packet(bytes): a bytes object of CAN packet
         """
         can_id = can_id | id_flag
         if fd_frame:
@@ -154,11 +154,11 @@ class CANSocket():
         Send CAN frame data through CANSocket
 
         Args:
-            can_packet (): CAN data packet
-            timeout:
+            can_packet: CAN data packet
+            timeout:    timeout for sending packet
 
         Raises:
-            SystemExit: if any error occurs during receiving CAN frame
+            SystemExit: if any error occurs during sending CAN frame
         """
         try:
             if timeout:
@@ -177,6 +177,9 @@ class CANSocket():
         """
         Receive data from CANSocket
 
+        Args:
+            timeout:    timeout for sending packet
+
         Raises:
             SystemExit: if any error occurs during receiving CAN frame
         """
@@ -188,7 +191,7 @@ class CANSocket():
             self.sock.settimeout(None)
             return can_pkt
         except TimeoutError:
-            logging.error("Failed to receive within %ss", 5)
+            logging.error("Failed to receive within %ss", timeout)
             return None
         except OSError as e:
             logging.error(e)
@@ -200,12 +203,18 @@ class CANSocket():
 
 
 class CANLinkState(Enum):
+    """CAN Link State
 
+    Reference link:
+    https://github.com/torvalds/linux/blob/master/include/uapi/linux/can/netlink.h#L69
+    """
     ERROR_ACTIVE = "ERROR-ACTIVE"
     ERROR_WARNING = "ERROR-WARNING"
     ERROR_PASSIVE = "ERROR-PASSIVE"
     BUS_OFF = "BUS-OFF"
     STOPPED = "STOPPED"
+    SLEEPING = "SLEEPING"
+    MAX = "MAX"
 
 
 class CANLinkInfo():
