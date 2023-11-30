@@ -1,17 +1,24 @@
 #!/bin/bash
 
-test_ubuntu_frame_launching() {
+is_ubuntu_frame_active() {
     if pgrep -if "ubuntu-frame" > /dev/null; then
         echo "The ubuntu-frame is active"
-        echo "No need to bring it up again"
         echo
-        echo "journal log of ubuntu frame:"
-        journalctl -b 0 | grep "ubuntu-frame"
-        touch "$PLAINBOX_SESSION_SHARE/ubuntu-frame-is-activating"
-        exit 0
+        return 0
     else
         echo "ubuntu-frame is not active"
-        echo "Activating now..."
+        echo
+        return 1
+    fi
+}
+
+test_ubuntu_frame_launching() {
+    if is_ubuntu_frame_active; then
+        echo "No need to bring it up again"
+        echo "journal log of ubuntu frame:"
+        journalctl -b 0 -g "ubuntu-frame"
+    else
+        echo "Activating ubuntu-frame now..."
         echo
         # Expecting exit code 124 from the 'timeout' command
         # Capture any exit codes other than 0 and 124; return exit code 1 in such cases
@@ -24,15 +31,12 @@ test_glmark2_es2_wayland() {
     CMD="env XDG_RUNTIME_DIR=/run/user/0 graphics-test-tools.glmark2-es2-wayland"
     OUTPUT=""
     EXIT=0
-    if [ -f "$PLAINBOX_SESSION_SHARE/ubuntu-frame-is-activating" ]; then
-        echo "The ubuntu-frame is already active"
+    if is_ubuntu_frame_active; then
         echo "Running glmark2-es2-wayland benchmark..."
         echo
         OUTPUT=$($CMD)
-        rm "$PLAINBOX_SESSION_SHARE/ubuntu-frame-is-activating"
     else
-        echo "ubuntu-frame is not active"
-        echo "Activating now..."
+        echo "Activating ubuntu-frame now..."
         echo
         ubuntu-frame &
         FRAME_PID=$!
@@ -42,6 +46,7 @@ test_glmark2_es2_wayland() {
         OUTPUT=$($CMD)
         kill "$FRAME_PID"
     fi
+
     echo "$OUTPUT"
     if [ -z "$GL_VENDOR" ] || [ -z "$GL_RENDERER" ];then
         echo "FAIL: 'GL_VENDOR' or 'GL_RENDERER' is empty. Please set them in config file!"
