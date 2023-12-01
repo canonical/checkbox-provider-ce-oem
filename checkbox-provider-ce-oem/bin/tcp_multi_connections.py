@@ -23,7 +23,7 @@ def server(start_port, end_port):
     - start_port (int): Starting port for the server.
     - end_port (int): Ending port for the server.
     """
-    for port in range(start_port, end_port+1):
+    for port in range(start_port, end_port + 1):
         threading.Thread(target=handle_port, args=(port,)).start()
 
 
@@ -35,7 +35,8 @@ def handle_port(port):
     - port (int): Port to handle connections.
     """
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as server_socket:
-        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        # Set send buffer size to 4096
+        server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 4096)
         server_socket.bind(('0.0.0.0', port))
         server_socket.listen()
 
@@ -43,32 +44,20 @@ def handle_port(port):
 
         while True:
             conn, addr = server_socket.accept()
-            threading.Thread(target=handle_client, args=(conn, addr)).start()
+            with conn:
+                logging.info("Connected by {}.".format(addr))
+                received_data = b''
+                while True:
+                    data = conn.recv(4096)
+                    if not data:
+                        break
+                    received_data += data
+                if received_data:
+                    logging.info("Received raw data from {}.".format(addr))
+                    conn.sendall(received_data)
 
 
-def handle_client(conn, addr):
-    """
-    Handle a client connection.
-
-    Args:
-    - conn (socket): Client socket connection.
-    - addr (str): Client address.
-    """
-    with conn:
-        logging.info("Connected by {}.".format(addr))
-        received_data = b''
-        while True:
-            data = conn.recv(1024)
-            if not data:
-                break
-            received_data += data
-        if received_data:
-            conn.shutdown(socket.SHUT_RD)
-            logging.info("Received raw data from {}.".format(addr))
-            conn.sendall(received_data)
-
-
-def client(host, start_port, end_port, payload, done_event, start_time):
+def client(host, start_port, end_port, payload, start_time):
     """
     Start the client to connect to a range of server ports.
 
@@ -81,7 +70,7 @@ def client(host, start_port, end_port, payload, done_event, start_time):
     - start_time (datetime): Time until which the client should run.
     """
     threads = []
-    for port in range(start_port, end_port+1):
+    for port in range(start_port, end_port + 1):
         thread = threading.Thread(target=send_payload,
                                   args=(host, port, payload, start_time))
         threads.append(thread)
@@ -91,7 +80,20 @@ def client(host, start_port, end_port, payload, done_event, start_time):
     for thread in threads:
         thread.join()
 
-    done_event.set()
+    fail_port = [x for x in results if "FAIL" in x]
+    error_port = [x for x in results if "ERROR" in x]
+    if not (fail_port or error_port):
+        logging.info("TCP connections test pass!")
+    else:
+        if fail_port:
+            for x in fail_port:
+                logging.error("Fail on port {}.".format(x.split(":")[0]))
+            raise RuntimeError("TCP payload test fail!")
+        if error_port:
+            for x in error_port:
+                logging.error("Not able to connect on port {}."
+                              .format(x.split(":")[0]))
+            raise RuntimeError("TCP connection fail!")
 
 
 def send_payload(host, port, payload, start_time):
@@ -107,24 +109,29 @@ def send_payload(host, port, payload, start_time):
     try:
         with socket.create_connection(
                 (host, port), timeout=600) as client_socket:
+            # Set send buffer size to 4096
+            client_socket.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 4096)
             logging.info("Connect to port {}".format(port))
             while datetime.now() < start_time:
                 time.sleep(1)
             logging.info("Sending payload to port {}.".format(port))
-            # Sending payload for 30 sec after start sending.
             count = 0
+            # Sending payload for 30 sec after start sending.
             while datetime.now() < start_time + timedelta(seconds=30):
                 client_socket.sendall(payload.encode())
                 count = count+1
+            # Shutdown send side by SHUT_WR, since socket.recv() won't recvie
+            # 0 until connection timeout, error or shutdown.
+            # ref: https://docs.python.org/3/howto/sockets.html
             client_socket.shutdown(socket.SHUT_WR)
             received_data = b''
             while True:
-                data = client_socket.recv(1024)
+                data = client_socket.recv(4096)
                 if not data:
                     break
                 received_data += data
             logging.info("Server response from port {}.".format(port))
-            if received_data == payload.encode()*count:
+            if received_data == payload.encode() * count:
                 results.append("{}:PASS".format(port))
             else:
                 results.append("{}:FAIL".format(port))
@@ -195,9 +202,7 @@ if __name__ == "__main__":
                                help="Ending port for the client")
     args = parser.parse_args()
 
-    done_event = threading.Event()
     results = []
-
     # Ramp up time to wait until all ports are connected before
     # starting to send the payload.
     start_time = datetime.now() + timedelta(seconds=30)
@@ -207,22 +212,4 @@ if __name__ == "__main__":
     elif args.mode == "client":
         payload = 'A' * (args.payload * 1024)
         client(args.host, args.port, args.end_port,
-               payload, done_event, start_time)
-
-    # Wait for all threads to finish
-    done_event.wait()
-
-    fail_port = [x for x in results if "FAIL" in x]
-    error_port = [x for x in results if "ERROR" in x]
-    if not (fail_port or error_port):
-        logging.info("TCP connections test pass!")
-    else:
-        if fail_port:
-            for x in fail_port:
-                logging.error("Fail on port {}.".format(x.split(":")[0]))
-            raise RuntimeError("TCP payload test fail!")
-        if error_port:
-            for x in error_port:
-                logging.error("Not able to connect on port {}."
-                              .format(x.split(":")[0]))
-            raise RuntimeError("TCP connection fail!")
+               payload, start_time)
