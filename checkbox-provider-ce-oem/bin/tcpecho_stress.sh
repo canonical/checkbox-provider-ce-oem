@@ -60,8 +60,7 @@ tcp_echo() {
     local port=$2
     local loop=$3
     local file=$4
-    local inloop=""
-    inloop=1000
+    local inloop=1000
     if [ "$loop" -lt "$inloop" ]; then
         group_loop=1
         inloop="$loop"
@@ -73,7 +72,7 @@ tcp_echo() {
     fi
     status=0
     # Dividing the whole test into a small test group, to prevent the cost to much effort to get a failure result.
-    for ((x=1; i <= "$group_loop"; x++))
+    for ((x=1; x <= "$group_loop"; x++))
     do
         for ((i=1; i <= "$inloop"; i++))
         do
@@ -89,7 +88,7 @@ tcp_echo() {
             fi
         done
         # Stop testing if group test failed
-        if [ "$status" -ne 1 ]; then
+        if [ "$status" -eq 1 ]; then
             break
         fi
     done
