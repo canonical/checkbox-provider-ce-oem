@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import os
 import re
 import sys
 import logging
@@ -49,13 +48,12 @@ def get_soc_family():
         soc_family (str): SoC family.
     """
     soc_family = ""
-    path = os.path.join(SOC_ROOT, "family")
-    soc_file = Path(path)
+    soc_file = Path(SOC_ROOT).joinpath("family")
     if soc_file.is_file():
         soc_family = soc_file.read_text().strip("\n")
         logging.info("SoC family is %s", soc_family)
     else:
-        raise SystemExit("{} file is not available".format(path))
+        raise SystemExit("{} file is not available".format(str(soc_file)))
 
     return soc_family
 
@@ -68,12 +66,11 @@ def get_soc_id():
         soc_id (str): SoC ID.
     """
     soc_id = ""
-    path = os.path.join(SOC_ROOT, "soc_id")
-    soc_file = Path(path)
+    soc_file = Path(SOC_ROOT).joinpath("soc_id")
     if soc_file.is_file():
         soc_id = soc_file.read_text().strip("\n")
     else:
-        raise SystemExit("{} file is not available".format(path))
+        raise SystemExit("{} file is not available".format(str(soc_file)))
 
     logging.info("SoC ID is %s", soc_id)
     return soc_id
@@ -157,7 +154,7 @@ def check_imx_vpu_devices():
         get_soc_id(),
         get_kernel_version()
     )
-    nodes = os.listdir("/dev")
+    nodes = [dev.name for dev in list(Path("/dev").iterdir())]
     for dev in expected_devices:
         if dev in nodes:
             logging.info("The %s device is available", dev)
