@@ -128,7 +128,7 @@ def determine_expected_imx_vpu(soc_type, kernel_version):
             "Supported VPU devices for {} is not defined".format(soc_type))
 
     major_ver, minor_ver = kernel_version.split(".")
-    if int(major_ver) >= 5 and int(minor_ver) >= 15:
+    if int(major_ver) > 5 or (int(major_ver) == 5 and int(minor_ver) >= 15):
         expected_devices.remove("ion")
 
     return expected_devices
@@ -198,11 +198,12 @@ def check_mtk_vpu_devices():
         "mtk-vcodec-dec", "mtk-vcodec-enc", "mtk-mdp[0-9]*:m2m"]
 
     check_result = []
-    for dev_name in get_v4l2_devices():
-        for pattern in expected_device_pattern:
+    for pattern in expected_device_pattern:
+        for dev_name in get_v4l2_devices():
             if re.search(pattern, dev_name):
                 check_result.append(dev_name)
                 logging.info("VPU %s device detected", dev_name)
+                break
 
     if len(check_result) == len(expected_device_pattern):
         logging.info("# VPU devices check: Passed")

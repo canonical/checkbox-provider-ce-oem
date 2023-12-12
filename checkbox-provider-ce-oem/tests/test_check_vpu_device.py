@@ -165,7 +165,7 @@ class VPUDeviceCheckTests(unittest.TestCase):
         ):
             check_vpu_device.determine_expected_imx_vpu("i.MX8MX", "5.4")
 
-    @mock.patch("os.listdir")
+    @mock.patch("pathlib.Path.iterdir")
     @mock.patch("check_vpu_device.get_soc_id")
     @mock.patch("check_vpu_device.get_kernel_version")
     @mock.patch("check_vpu_device.determine_expected_imx_vpu")
@@ -186,9 +186,11 @@ class VPUDeviceCheckTests(unittest.TestCase):
         mock_expected_imx_vpu.return_value = expected_imx_vpus
         mock_kernel_ver.return_value = "5.4"
         mock_soc_id.return_value = "i.MX8MM"
-        mock_listdir.return_value = [
-            "tty1", "ion", "mxc_hantro", "mxc_hantro_h1"
-        ]
+        mock_result = [mock.Mock(), mock.Mock(), mock.Mock()]
+        mock_result[0].name = "ion"
+        mock_result[1].name = "mxc_hantro"
+        mock_result[2].name = "mxc_hantro_h1"
+        mock_listdir.return_value = mock_result
 
         with self.assertLogs() as lc:
             check_vpu_device.check_imx_vpu_devices()
@@ -198,7 +200,7 @@ class VPUDeviceCheckTests(unittest.TestCase):
                 prefix.format(value), lc.output[index])
         self.assertIn("# VPU devices check: Passed", lc.output[-1])
 
-    @mock.patch("os.listdir")
+    @mock.patch("pathlib.Path.iterdir")
     @mock.patch("check_vpu_device.get_soc_id")
     @mock.patch("check_vpu_device.get_kernel_version")
     @mock.patch("check_vpu_device.determine_expected_imx_vpu")
@@ -216,9 +218,10 @@ class VPUDeviceCheckTests(unittest.TestCase):
         mock_expected_imx_vpu.return_value = [
             "ion", "mxc_hantro", "mxc_hantro_h1"
         ]
-        mock_listdir.return_value = [
-            "tty1", "ion", "mxc_hantro"
-        ]
+        mock_result = [mock.Mock(), mock.Mock()]
+        mock_result[0].name = "ion"
+        mock_result[1].name = "mxc_hantro"
+        mock_listdir.return_value = mock_result
 
         with self.assertRaises(SystemExit), \
              self.assertLogs(level="ERROR") as lc:
@@ -241,8 +244,8 @@ class VPUDeviceCheckTests(unittest.TestCase):
         ]
         expected_devices = [
             "mtk-vcodec-dec",
-            "mtk-mdp:m2m",
-            "mtk-vcodec-enc"
+            "mtk-vcodec-enc",
+            "mtk-mdp:m2m"
         ]
         prefix = "INFO:root:VPU {} device detected"
 
