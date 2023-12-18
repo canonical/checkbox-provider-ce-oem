@@ -30,12 +30,7 @@ class VPUDeviceCheckTests(unittest.TestCase):
         Checking SoC family file is not available
         """
         mock_is_file.return_value = False
-        with self.assertRaisesRegex(
-            SystemExit,
-            "{}/family file is not available".format(
-                check_vpu_device.SOC_ROOT
-            )
-        ):
+        with self.assertRaises(FileNotFoundError):
             check_vpu_device.get_soc_family()
 
     @mock.patch("pathlib.Path.read_text")
@@ -61,12 +56,7 @@ class VPUDeviceCheckTests(unittest.TestCase):
         Checking SoC ID file is not available
         """
         mock_is_file.return_value = False
-        with self.assertRaisesRegex(
-            SystemExit,
-            "{}/soc_id file is not available".format(
-                check_vpu_device.SOC_ROOT
-            )
-        ):
+        with self.assertRaises(FileNotFoundError):
             check_vpu_device.get_soc_id()
 
     @mock.patch("pathlib.Path.read_text")
@@ -97,10 +87,7 @@ class VPUDeviceCheckTests(unittest.TestCase):
         kernel_raw_data = "Linux version 5.1-89-generic (amd64-004)"
         mock_is_file.return_value = True
         mock_read_text.return_value = kernel_raw_data
-        with self.assertRaisesRegex(
-            SystemExit,
-            "Failed to identify kernel version"
-        ):
+        with self.assertRaises(ValueError):
             check_vpu_device.get_kernel_version()
 
     @mock.patch("pathlib.Path.is_file")
@@ -109,10 +96,7 @@ class VPUDeviceCheckTests(unittest.TestCase):
         Checking kernel version file is not available
         """
         mock_is_file.return_value = False
-        with self.assertRaisesRegex(
-            SystemExit,
-            "/proc/version file is not available"
-        ):
+        with self.assertRaises(FileNotFoundError):
             check_vpu_device.get_kernel_version()
 
     def test_imx8mm_vpus(self):
@@ -228,7 +212,7 @@ class VPUDeviceCheckTests(unittest.TestCase):
 
             check_vpu_device.check_imx_vpu_devices()
         self.assertEqual(
-            "ERROR:root:The mxc_hantro_h1 device is not exists!!",
+            "ERROR:root:The mxc_hantro_h1 device is not exists!",
             lc.output[-1])
 
     @mock.patch("check_vpu_device.get_v4l2_devices")

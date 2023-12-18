@@ -53,7 +53,8 @@ def get_soc_family():
         soc_family = soc_file.read_text().strip("\n")
         logging.info("SoC family is %s", soc_family)
     else:
-        raise SystemExit("{} file is not available".format(str(soc_file)))
+        raise FileNotFoundError(
+                "{} file is not available".format(str(soc_file)))
 
     return soc_family
 
@@ -70,7 +71,8 @@ def get_soc_id():
     if soc_file.is_file():
         soc_id = soc_file.read_text().strip("\n")
     else:
-        raise SystemExit("{} file is not available".format(str(soc_file)))
+        raise FileNotFoundError(
+                "{} file is not available".format(str(soc_file)))
 
     logging.info("SoC ID is %s", soc_id)
     return soc_id
@@ -91,12 +93,12 @@ def get_kernel_version():
     if kernel_file.is_file():
         raw_data = kernel_file.read_text().strip("\n")
     else:
-        raise SystemExit("{} file is not available".format(path))
+        raise FileNotFoundError("{} file is not available".format(path))
 
     kernel_match = re.search(
         r"Linux version ([0-9]+\.[0-9]+)\.[0-9]+-", raw_data)
     if kernel_match is None:
-        raise SystemExit("Failed to identify kernel version")
+        raise ValueError("Failed to identify kernel version")
 
     return kernel_match.groups()[0]
 
@@ -159,13 +161,13 @@ def check_imx_vpu_devices():
         if dev in nodes:
             logging.info("The %s device is available", dev)
         else:
-            logging.error("The %s device is not exists!!", dev)
+            logging.error("The %s device is not exists!", dev)
             result = False
 
-    if result is False:
-        raise SystemExit("# VPU devices check: Failed")
-    else:
+    if result:
         logging.info("# VPU devices check: Passed")
+    else:
+        raise SystemExit("# VPU devices check: Failed")
 
 
 def get_v4l2_devices():
