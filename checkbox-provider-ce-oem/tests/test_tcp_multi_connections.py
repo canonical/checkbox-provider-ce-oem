@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
 import unittest
-from datetime import timedelta
+from datetime import timedelta, datetime
 import tcp_multi_connections
+from unittest.mock import patch, Mock, MagicMock
+import logging
 
 
 class TestPortOutputer(unittest.TestCase):
@@ -73,6 +75,72 @@ class TestPortOutputer(unittest.TestCase):
         self.assertEqual(result['avg_period'], None)
         self.assertEqual(result['max_period'], None)
         self.assertEqual(result['min_period'], None)
+
+
+class TestTcpMulitConnections(unittest.TestCase):
+    """
+    Test TCP mulit-Connections test script
+    """
+
+    def test_send_payload_connection_refused(self):
+        """
+        Test connections refused.
+        """
+        payload = "test"
+        host = '0.0.0.0'
+        port = '1234'
+        start_time = datetime.now() + timedelta(seconds=1)
+        results = []
+        result = tcp_multi_connections.send_payload(host, port,
+                                                    payload,
+                                                    start_time,
+                                                    results)
+        log = "Connection refused"
+        self.assertIn(log, result[0]['message'])
+
+    @patch('socket.create_connection')
+    def test_send_payload_success(self,
+                                  mock_create_connection,):
+        """
+        Test send_paylaod success and receive expect payload.
+        """
+        payload = "test"
+        host = '0.0.0.0'
+        port = '1234'
+        start_time = datetime.now() + timedelta(seconds=1)
+        results = []
+        mock_socket = Mock(recv=Mock(return_value=payload.encode()))
+        mock_create_connection.return_value.__enter__.return_value \
+            = mock_socket
+
+        result = tcp_multi_connections.send_payload(host, port,
+                                                    payload,
+                                                    start_time,
+                                                    results)
+        self.assertEqual(result[0]['status'], 'PASS')
+        self.assertEqual(result[0]['port'], '1234')
+
+    @patch('socket.create_connection')
+    def test_send_payload_fail(self,
+                               mock_create_connection,):
+        """
+        Test send_paylaod success and receive unexpect payload.
+        """
+        payload = "test"
+        host = '0.0.0.0'
+        port = '1234'
+        start_time = datetime.now() + timedelta(seconds=1)
+        results = []
+        mock_socket = Mock(recv=Mock(return_value="unexpect".encode()))
+        mock_create_connection.return_value.__enter__.return_value \
+            = mock_socket
+
+        result = tcp_multi_connections.send_payload(host, port,
+                                                    payload,
+                                                    start_time,
+                                                    results)
+        self.assertEqual(result[0]['status'], 'FAIL')
+        self.assertEqual(result[0]['port'], '1234')
 
 
 if __name__ == '__main__':
