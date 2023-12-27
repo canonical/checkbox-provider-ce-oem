@@ -8,7 +8,6 @@ command: thermal_sensor_test.py dump
 
 unit: template
 template-resource: thermal_zones
-template-filter: thermal_zones.mode == 'enabled'
 id: ce-oem-thermal/temperature_{name}_{type}
 _summary: Check Thermal temperature of {name} - {type}
 _description:
@@ -18,6 +17,5 @@ plugin: shell
 user: root
 estimated_duration: 5m
 flags: also-after-suspend
-requires:
 command:
     thermal_sensor_test.py monitor -n {name}

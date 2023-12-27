@@ -87,29 +87,37 @@ def thermal_monitor_test(args):
         args.name, args.duration)
 
     if args.extra_commands == "stress-ng":
-        cmd = "stress-ng --cpu 0 --io 4 --vm 2 --vm-bytes 128M --timeout 60s"
+        cmd = ("stress-ng --cpu 0 --io 4 --vm 2 "
+               "--vm-bytes 128M --timeout {}s").format(args.duration)
     else:
         cmd = args.extra_commands
 
+    thermal_op = ThermalMonitor(args.name)
+    if thermal_op.mode == "disabled":
+        raise SystemExit("Error: The {}-{} thermal is disabled".format(
+                                            thermal_op.name, thermal_op.type))
+    initial_value = thermal_op.temperature
+
     result = False
     try:
-        thermal_op = ThermalMonitor(args.name)
-        initial_value = thermal_op.temperature
-
-        with subprocess.Popen(shlex.split(cmd)) as proc:
-            for _ in range(args.duration):
-                cur_temp = thermal_op.temperature
-                result = check_temperature(cur_temp, initial_value)
-                if result:
-                    logging.info(
-                        "# The temperature of %s thermal has been altered",
-                        args.name)
-                    break
-                time.sleep(1)
-            proc.kill()
-    except subprocess.CalledProcessError:
-        # Bypass the subprocess error
+        proc = subprocess.Popen(shlex.split(cmd))
+    except Exception:
+        # Bypass any error while issue command through Popen
+        # Due to the command here is trying to increase system loading
         pass
+
+    for _ in range(args.duration):
+        cur_temp = thermal_op.temperature
+        result = check_temperature(cur_temp, initial_value)
+        if result:
+            logging.info(
+                "# The temperature of %s thermal has been altered",
+                args.name)
+            break
+        time.sleep(1)
+    if proc.poll() is None:
+        # kill the subprocess if it is still alive
+        proc.kill()
 
     if result is False:
         logging.error(
@@ -148,12 +156,15 @@ def register_arguments():
     monitor_parser.add_argument(
         "-d", "--duration",
         type=int,
-        default=60
+        default=60,
+        help="the time period to monitor thermal temperature"
     )
     monitor_parser.add_argument(
         "--extra-commands",
         type=str,
-        default="stress-ng"
+        default="stress-ng",
+        help=("the command is for increase the system loading, "
+              "will apply stress-ng by default")
     )
     monitor_parser.set_defaults(test_type=thermal_monitor_test)
 
