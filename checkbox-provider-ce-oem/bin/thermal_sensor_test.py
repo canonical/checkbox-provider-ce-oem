@@ -99,6 +99,7 @@ def thermal_monitor_test(args):
     initial_value = thermal_op.temperature
 
     result = False
+    proc = None
     try:
         proc = subprocess.Popen(shlex.split(cmd))
     except Exception:
@@ -115,7 +116,7 @@ def thermal_monitor_test(args):
                 args.name)
             break
         time.sleep(1)
-    if proc.poll() is None:
+    if proc and proc.poll() is None:
         # kill the subprocess if it is still alive
         proc.kill()
 
