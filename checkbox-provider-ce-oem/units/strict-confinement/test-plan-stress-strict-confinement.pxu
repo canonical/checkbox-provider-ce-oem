@@ -1,0 +1,20 @@
+id: stress-warm-boot-dbus
+unit: test plan
+_name: Warm reboot stress test via dbus
+_description: Warm reboot stress test by using dbus command
+bootstrap_include:
+    com.canonical.certification::reboot-run-generator
+include:
+    dbus-warm-boot-loop-boot.*
+    dbus-warm-boot-loop-test.*
+
+
+id: stress-cold-boot-dbus
+unit: test plan
+_name: Cold boot stress test via dbus
+_description: Cold boot stress test by using dbus command
+bootstrap_include:
+    com.canonical.certification::reboot-run-generator
+include:
+    dbus-cold-boot-loop-boot.*
+    dbus-cold-boot-loop-test.*
