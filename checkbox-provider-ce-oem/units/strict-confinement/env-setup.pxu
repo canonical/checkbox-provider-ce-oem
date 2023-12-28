@@ -1,0 +1,8 @@
+id: test-strict-confinement-env-setup
+_summary: Install and connect interface of test-strict-confinement snap.
+_purpose: Install and connect interface of test-strict-confinement snap for strict confinement test.
+plugin: shell
+user: root
+category_id: strict-confinement-mode
+estimated_duration: 30
+command: env-setup.py
