@@ -3,57 +3,58 @@
 import unittest
 from datetime import timedelta, datetime
 import tcp_multi_connections
+from tcp_multi_connections import StatusEnum
 from unittest.mock import patch, Mock, MagicMock
-import logging
 
 
-class TestPortOutputer(unittest.TestCase):
+class TestTcpMulitConnections(unittest.TestCase):
     """
-    Unit test for PortOutputer
+    Test TCP mulit-Connections test script
     """
 
-    def test_generate_result_pass(self):
+    def test_format_output_pass(self):
         """
         Test if port test pass.
         """
-        list_status = {
+        dict_status = {
             0: {'time': timedelta(seconds=5), 'status': True},
             1: {'time': timedelta(seconds=10), 'status': True},
             2: {'time': timedelta(seconds=3), 'status': True},
         }
-        port_outputer = tcp_multi_connections.PortOutputer(
+        result = tcp_multi_connections.format_output(
             port=123,
-            list_status=list_status)
+            message="",
+            dict_status=dict_status)
 
-        result = port_outputer.generate_result()
         self.assertEqual(result['port'], 123)
-        self.assertEqual(result['status'], 'PASS')
+        self.assertEqual(result['status'], StatusEnum.SUCCESS)
         self.assertEqual(result['message'], 'Received payload correct!')
-        self.assertEqual(result['total_period'],
-                         timedelta(seconds=18))
+        self.assertEqual(result['fail'], None)
+        self.assertEqual(result['total_period'], timedelta(seconds=18))
         self.assertEqual(result['avg_period'], timedelta(seconds=6))
         self.assertEqual(result['max_period'], timedelta(seconds=10))
         self.assertEqual(result['min_period'], timedelta(seconds=3))
 
-    def test_generate_result_fail(self):
+    def test_format_output_fail(self):
         """
         Test if port test fail.
         """
-        list_status = {
+        dict_status = {
             0: {'time': timedelta(seconds=5), 'status': True},
             1: {'time': timedelta(seconds=10), 'status': False},
             2: {'time': timedelta(seconds=3), 'status': True},
         }
-        port_outputer = tcp_multi_connections.PortOutputer(
+        result = tcp_multi_connections.format_output(
             port=123,
-            list_status=list_status)
+            message="",
+            dict_status=dict_status)
 
-        result = port_outputer.generate_result()
         self.assertEqual(result['port'], 123)
-        self.assertEqual(result['status'], 'FAIL')
+        self.assertEqual(result['status'], StatusEnum.FAIL)
         self.assertEqual(result['message'], 'Received payload incorrect!')
-        self.assertEqual(result['total_period'],
-                         timedelta(seconds=18))
+        self.assertEqual(result['fail'],
+                         [{'time': timedelta(seconds=10), 'status': False}])
+        self.assertEqual(result['total_period'], timedelta(seconds=18))
         self.assertEqual(result['avg_period'], timedelta(seconds=6))
         self.assertEqual(result['max_period'], timedelta(seconds=10))
         self.assertEqual(result['min_period'], timedelta(seconds=3))
@@ -62,25 +63,19 @@ class TestPortOutputer(unittest.TestCase):
         """
         Test if port test with error.
         """
-        port_outputer = tcp_multi_connections.PortOutputer(
+        result = tcp_multi_connections.format_output(
             port=123,
             message="Connection error!"
             )
 
-        result = port_outputer.generate_result()
         self.assertEqual(result['port'], 123)
-        self.assertEqual(result['status'], 'ERROR')
+        self.assertEqual(result['status'], StatusEnum.ERROR)
         self.assertEqual(result['message'], 'Connection error!')
+        self.assertEqual(result['fail'], None)
         self.assertEqual(result['total_period'], None)
         self.assertEqual(result['avg_period'], None)
         self.assertEqual(result['max_period'], None)
         self.assertEqual(result['min_period'], None)
-
-
-class TestTcpMulitConnections(unittest.TestCase):
-    """
-    Test TCP mulit-Connections test script
-    """
 
     def test_send_payload_connection_refused(self):
         """
@@ -117,7 +112,7 @@ class TestTcpMulitConnections(unittest.TestCase):
                                                     payload,
                                                     start_time,
                                                     results)
-        self.assertEqual(result[0]['status'], 'PASS')
+        self.assertEqual(result[0]['status'], StatusEnum.SUCCESS)
         self.assertEqual(result[0]['port'], '1234')
 
     @patch('socket.create_connection')
@@ -139,7 +134,7 @@ class TestTcpMulitConnections(unittest.TestCase):
                                                     payload,
                                                     start_time,
                                                     results)
-        self.assertEqual(result[0]['status'], 'FAIL')
+        self.assertEqual(result[0]['status'], StatusEnum.FAIL)
         self.assertEqual(result[0]['port'], '1234')
 
 
