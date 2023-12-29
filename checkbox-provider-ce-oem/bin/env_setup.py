@@ -2,6 +2,7 @@
 import json
 import logging
 import argparse
+import os
 from checkbox_support.snap_utils.snapd import Snapd
 from checkbox_support.snap_utils.system import get_gadget_snap
 
@@ -9,40 +10,7 @@ CONFIG_FILE = {
     "test-strict-confinement": {
         "channel": "edge",
         "plugs": {
-            "jace-bt-led": {
-                "gadget": "bt-led",
-            },
-            "jace-hb-led": {
-                "gadget": "hb-led",
-            },
-            "jace-shutdown-led": {
-                "gadget": "shutdown-led",
-            },
-            "jace-status-led": {
-                "gadget": "status-led",
-            },
-            "jace-wifi-grn-led": {
-                "gadget": "wifi-grn-led",
-            },
-            "jace-wifi-yel-led": {
-                "gadget": "wifi-yel-led",
-            },
-            "thermal": {
-                "snapd": "hardware-observe",
-            },
-            "button": {
-                "snapd": "device-buttons",
-            },
-            "time": {
-                "snapd": "time-control",
-            },
-            "serial": {
-                "snapd": "raw-usb",
-            },
-            "media-card": {
-                "snapd": "removable-media",
-            },
-            "power-management": {
+            "shutdown": {
                 "snapd": "shutdown",
             },
         },
@@ -51,7 +19,7 @@ CONFIG_FILE = {
 
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s [%(levelname)s] %(message)s",
     handlers=[
         logging.StreamHandler(),
@@ -72,34 +40,40 @@ def get_snap_plugs(snapd, snap):
         List[str]: A list of plugs associated with the specified snap.
     """
     snap_plugs = []
-    for x in snapd.interfaces()["plugs"]:
-        if x["snap"] == snap:
-            snap_plugs.append(x["plug"])
+    for plug in snapd.interfaces()["plugs"]:
+        if plug["snap"] == snap:
+            snap_plugs.append(plug["plug"])
     return snap_plugs
 
 
 def get_config(config_file, config_path):
     """
     Load and retrieve the configuration from a JSON file.
-
     Parameters:
-        - config_file (dict): The default configuration dictionary.
         - config_path (str): The path to the JSON configuration file.
-
     Returns:
-        dict: The loaded configuration dictionary. Return default
-              config file if not found additional one.
+        dict: The loaded configuration dictionary. Returns DEFAULT_CONFIG_FILE
+              if config_path is empty, not provided, or does not meet criteria.
     """
-    if config_path:
+    if not config_path:
+        logging.info("Config path not provided. Using default config.")
+    # Check if the path exists and has a .json extension
+    elif os.path.exists(config_path) and config_path.lower().endswith('.json'):
         try:
-            config_file = json.load(open(config_path))
-            return config_file
+            with open(config_path) as file:
+                return json.load(file)
         except FileNotFoundError:
-            logging.warning("Config file {} not found".format(config_path))
-            logging.info("Using default config.")
-            return config_file
+            logging.warning("Config file %s not found. Using default config.",
+                            config_path)
+        except json.JSONDecodeError as e:
+            logging.warning("Error decoding JSON in %s: %s. Using default "
+                            "config.",
+                            config_path, e)
     else:
-        return config_file
+        logging.warning("Invalid config path: %s. Using default config.",
+                        config_path)
+
+    return config_file
 
 
 def connect_interfaces(snapd,
@@ -130,27 +104,24 @@ def connect_interfaces(snapd,
                 slot_snap = get_gadget_snap()
             try:
                 logging.info("Attempting to connect interface "
-                             "\"{}:{}\" \"{}:{}\""
-                             .format(plug_snap,
-                                     plug,
-                                     slot_snap,
-                                     slot_plug))
+                             "\"%s:%s\" \"%s:%s\"",
+                             plug_snap, plug, slot_snap, slot_plug
+                             )
                 snapd.connect(slot_snap,
                               slot_plug,
                               plug_snap,
                               plug)
             except Exception as err:
                 status = False
-                logging.error("Not able to connect plug \"{}:{}\" "
-                              "to slot \"{}:{}\"."
-                              .format(plug_snap,
-                                      plug,
-                                      slot_snap,
-                                      slot_plug))
+                logging.error("Not able to connect plug \"%s:%s\" "
+                              "to slot \"%s:%s\".",
+                              plug_snap, plug, slot_snap, slot_plug
+                              )
                 logging.error(err)
         else:
-            logging.error("Expect plug \"{}\" not in the snap \"{}\"."
-                          .format(plug, plug_snap))
+            logging.error("Expect plug \"%s\" not in the snap \"%s\".",
+                          plug, plug_snap
+                          )
             status = False
     return status
 
@@ -178,8 +149,7 @@ def main():
             "test-strict-confinement": {
                 "channel": "edge",
                 "plugs": {
-                    "jace-bt-led": {"gadget": "bt-led"},
-                    "jace-hb-led": {"gadget": "hb-led"},
+                    "shutdown": {"snapd": "shutdown"},
                     ...
                 }
             },
@@ -197,7 +167,7 @@ def main():
     snapd = Snapd()
     config_file = get_config(CONFIG_FILE, args.file)
     for plug_snap in config_file.keys():
-        logging.info("Attempting to install {}".format(plug_snap))
+        logging.info("Attempting to install %s snap", plug_snap)
         if not snapd.list(plug_snap):
             try:
                 snapd.install(plug_snap,

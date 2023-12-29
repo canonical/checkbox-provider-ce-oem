@@ -50,8 +50,7 @@ _description:
   Ubuntu Core QA test plan that includes all stress tests required for strict confinement mode
 bootstrap_include:
 include:
-    test-strict-confinement-env-setup
 nested_part:
-    stress-warm-boot-dbus
-    stress-cold-boot-dbus
+    dbus-warm-boot
+    dbus-cold-boot
 exclude:
