@@ -48,7 +48,7 @@ def format_output(port, message="", dict_status={}):
         'status': StatusEnum.SUCCESS,
         'message': None,
         'fail': None,
-        'total_period': None,
+        'port_period': None,
         'avg_period': None,
         'max_period': None,
         'min_period': None,
@@ -65,8 +65,8 @@ def format_output(port, message="", dict_status={}):
             result['message'] = "Received payload incorrect!"
         else:
             result['message'] = "Received payload correct!"
-        result['total_period'] = sum(times, timedelta())
-        result['avg_period'] = sum(times, timedelta())/len(times)
+        result['port_period'] = sum(times, timedelta())
+        result['avg_period'] = result['port_period']/len(times)
         result['max_period'] = max(times)
         result['min_period'] = min(times)
     return result
@@ -78,9 +78,9 @@ def check_result(results):
         if port['status'] == StatusEnum.FAIL:
             final = 1
             logging.error(
-                "Fail on port %s: %s\n",
+                "Fail on port %s: %s",
                 port['port'], port['message'])
-            logging.error("Detail:\n")
+            logging.error("Detail:")
             for value in port['fail']:
                 logging.error("Period: %s, Status: %s",
                               value['time'], value['status'])
@@ -137,7 +137,7 @@ def handle_port(port):
                 except Exception as e:
                     logging.error("Error handling connection: %s", str(e))
     except Exception as e:
-        logging.error("{}: An unexpected error occurred for port %s",
+        logging.error("%s: An unexpected error occurred for port %s",
                       str(e), port)
 
 
@@ -153,7 +153,6 @@ def client(host, start_port, end_port, payload, start_time, results):
     - done_event (threading.Event): Event to single when the client is done.
     - start_time (datetime): Time until which the client should run.
     """
-    time = datetime.now()
     threads = []
     payload = generate_random_string(payload * 1024)
     for port in range(start_port, end_port + 1):
@@ -168,7 +167,8 @@ def client(host, start_port, end_port, payload, start_time, results):
     # Wait for all client threads to finish
     for thread in threads:
         thread.join()
-    logging.info("Running TCP multi-connections in %s", (datetime.now() - time))
+    logging.info("Running TCP multi-connections in %s",
+                 (datetime.now() - start_time))
     check_result(results)
 
 
