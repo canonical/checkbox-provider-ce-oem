@@ -4,7 +4,11 @@ import argparse
 import threading
 import logging
 import time
+import string
+import random
 from datetime import datetime, timedelta
+from enum import Enum
+
 
 logging.basicConfig(
     level=logging.DEBUG,
@@ -15,87 +19,81 @@ logging.basicConfig(
 )
 
 
-class PortOutputer():
-    def __init__(self, port,
-                 message="",
-                 list_status={}):
-        self.port = port
-        self.message = message
-        self.list_status = list_status
-        self._status = None
-        self._total_period = None
-        self._avg_time_period = None
-        self._max_time_period = None
-        self._min_time_period = None
+class StatusEnum(Enum):
+    SUCCESS = 0
+    ERROR = 1
+    FAIL = 2
 
-    @property
-    def status(self):
-        if not self.list_status:
-            return "ERROR"
+
+def generate_random_string(length):
+    letters_and_digits = string.ascii_letters + string.digits
+    random_string = ''.join(
+        random.choice(letters_and_digits) for _ in range(length))
+    return random_string
+
+
+def sorting_data(dict_status):
+    list_times = []
+    fail_records = []
+    for value in dict_status.values():
+        list_times.append(value.get('time'))
+        if not value.get('status'):
+            fail_records.append(value)
+    return list_times, fail_records
+
+
+def format_output(port, message="", dict_status={}):
+    status = StatusEnum.SUCCESS
+    times = records = None
+    if message:
+        status = StatusEnum.ERROR
+    elif dict_status:
+        times, records = sorting_data(dict_status)
+        if records:
+            status = StatusEnum.FAIL
+            message = "Received payload incorrect!"
         else:
-            for check in self.list_status.values():
-                if check['status'] is False:
-                    self.message = "Received payload incorrect!"
-                    return "FAIL"
-            self.message = "Received payload correct!"
-            return "PASS"
+            message = "Received payload correct!"
 
-    @property
-    def total_period(self):
-        if not self.list_status:
-            return self._total_period
-        else:
-            total_value = timedelta()
-            for value in self.list_status.values():
-                total_value += value.get('time')
-            return total_value
+    return {
+        'port': port,
+        'status': status,
+        'message': message,
+        'fail': records if records else None,
+        'total_period': sum(times, timedelta()) if times else None,
+        'avg_period': sum(times, timedelta())/len(times) if times else None,
+        'max_period': max(times) if times else None,
+        'min_period': min(times) if times else None,
+    }
 
-    @property
-    def avg_time_period(self):
-        if not self.list_status:
-            return self._avg_time_period
-        else:
-            sum_value = timedelta()
-            for value in self.list_status.values():
-                sum_value += value.get('time')
-            return (sum_value / len(self.list_status))
 
-    @property
-    def max_time_period(self):
-        if not self.list_status:
-            return self._max_time_period
-        else:
-            max_value = timedelta()
-            for value in self.list_status.values():
-                current_value = value.get('time')
-                max_value = max(max_value, current_value)
-            return max_value
-
-    @property
-    def min_time_period(self):
-        if not self.list_status:
-            return self._min_time_period
-        else:
-            min_value = None
-            for value in self.list_status.values():
-                current_value = value.get('time')
-                if min_value is None:
-                    min_value = current_value
-                else:
-                    min_value = min(min_value, current_value)
-            return min_value
-
-    def generate_result(self):
-        return {
-            'port': self.port,
-            'status': self.status,
-            'message': self.message,
-            'list_status': self.list_status,
-            'total_period': self.total_period,
-            'avg_period': self.avg_time_period,
-            'max_period': self.max_time_period,
-            'min_period': self.min_time_period,
-        }
+def generate_result(results, run_time):
+    final = 0
+    for ports in results:
+        if ports['status'] == StatusEnum.FAIL:
+            final = 1
+            logging.error("Fail on port {}.\n"
+                          "{}\n"
+                          "Detail:\n{}"
+                          .format(ports['port'],
+                                  ports['message'],
+                                  "\n"
+                                  .join("period: {} status: {}"
+                                        .format(
+                                                value['time'],
+                                                value['status']
+                                                ) for value in ports['fail'])))
+        elif ports['status'] == StatusEnum.ERROR:
+            final = 1
+            logging.error("Not able to connect on port {}."
+                          "{}"
+                          .format(ports['port'],
+                                  ports['message']))
+    if final:
+        raise RuntimeError("TCP payload test fail!")
+    else:
+        logging.info("Run TCP multi-connections test in {}"
+                     .format(run_time))
 
 
 def server(start_port, end_port):
@@ -158,9 +156,9 @@ def client(host, start_port, end_port, payload, start_time, results):
     - done_event (threading.Event): Event to single when the client is done.
     - start_time (datetime): Time until which the client should run.
     """
-    global global_results
     time = datetime.now()
     threads = []
+    payload = generate_random_string(payload * 1024)
     for port in range(start_port, end_port + 1):
         thread = threading.Thread(target=send_payload,
                                   args=(host,
@@ -170,36 +168,11 @@ def client(host, start_port, end_port, payload, start_time, results):
                                         results))
         threads.append(thread)
         thread.start()
-
     # Wait for all client threads to finish
     for thread in threads:
         thread.join()
-    final = 0
-    for x in results:
-        if ("FAIL") in x['status']:
-            final = 1
-            logging.error("Fail on port {}.\n"
-                          "{}\n"
-                          "Detail:\n{}"
-                          .format(x['port'],
-                                  x['message'],
-                                  "\n".join("{}: period: {} status: {}"
-                                            .format(key,
-                                                    value['time'],
-                                                    value['status']) for key,
-                                            value in x['list_status'].items()))
-                          )
-        elif ("ERROR") in x['status']:
-            final = 1
-            logging.error("Not able to connect on port {}."
-                          "{}"
-                          .format(x['port'],
-                                  x['message']))
-    if final:
-        raise RuntimeError("TCP payload test fail!")
-    else:
-        logging.info("Run TCP multi-connections test in {}"
-                     .format(datetime.now() - time))
+
+    generate_result(results, (datetime.now() - time))
 
 
 def send_payload(host, port, payload, start_time, results):
@@ -212,8 +185,9 @@ def send_payload(host, port, payload, start_time, results):
     - payload (str): Payload to send to the server.
     - start_time (datetime): Time until which the client should run.
     """
-    port_result = PortOutputer(port=port)
     # Retry connect to server port for 5 times.
+    message = ""
+    status_all = {}
     for _ in range(5):
         try:
             server_host = (host, port)
@@ -227,7 +201,6 @@ def send_payload(host, port, payload, start_time, results):
                 time.sleep(start_time.total_seconds())
                 logging.info("Sending payload to port {}.".format(port))
                 # Sending payload for 10 times
-                status_all = {}
                 for x in range(10):
                     single_start = datetime.now()
                     client_socket.sendall(payload.encode())
@@ -252,20 +225,16 @@ def send_payload(host, port, payload, start_time, results):
                                          'status': True}
                 logging.info("Received payload from {}.".
                              format(server_host))
-                port_result.port = port
-                port_result.list_status = status_all
                 client_socket.close()
                 break
         except socket.error as e:
             logging.error("{} on {}".format(e, port))
-            port_result.message = str(e)
-            port_result.port = port
+            message = str(e)
         except Exception as e:
             logging.error("{} on {}".format(e, port))
-            port_result.message = str(e)
-            port_result.port = port
+            message = str(e)
         time.sleep(3)
-    results.append(port_result.generate_result())
+    results.append(format_output(port, message, status_all))
     return results
 
 
@@ -335,6 +304,5 @@ if __name__ == "__main__":
     if args.mode == "server":
         server(args.port, args.end_port)
     elif args.mode == "client":
-        payload = 'A' * (args.payload * 1024)
         client(args.host, args.port, args.end_port,
-               payload, start_time, results)
+               args.payload, start_time, results)
