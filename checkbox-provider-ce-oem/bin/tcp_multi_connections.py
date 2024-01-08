@@ -149,7 +149,7 @@ def client(host, start_port, end_port, payload, start_time, results):
     - host (str): Server host.
     - start_port (int): Starting port for the client.
     - end_port (int): Ending port for the client.
-    - payload (str): Payload to send to the server.
+    - payload (int): Payload to send to the server.
     - done_event (threading.Event): Event to single when the client is done.
     - start_time (datetime): Time until which the client should run.
     """
