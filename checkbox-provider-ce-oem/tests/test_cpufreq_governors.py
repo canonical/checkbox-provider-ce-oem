@@ -125,7 +125,7 @@ class TestCPUScalingHandler(unittest.TestCase):
     def setUp(self):
         suppress_text = io.StringIO()
         sys.stdout = suppress_text
-        logging.disable()
+        logging.disable(logging.CRITICAL)
         self.cpu_scaling_info = CPUScalingHandler()
         self.cpu_scaling_info.sys_cpu_dir = "/sys/devices/system/cpu"
 
@@ -468,8 +468,15 @@ class TestCPUScalingHandler(unittest.TestCase):
 
         self.assertFalse(result)
 
+    def tearDown(self):
+        logging.disable(logging.NOTSET)
+
 
 class TestCPUScalingTest(unittest.TestCase):
+
+    def setUp(self):
+        logging.disable(logging.CRITICAL)
+
     @patch("cpufreq_governors.CPUScalingHandler")
     def test_print_policy_info(self, mock_cpuscalinghandler):
         mock_handler_instance = Mock()
@@ -499,7 +506,7 @@ class TestCPUScalingTest(unittest.TestCase):
             cpu_scaling_test.print_policy_info()
             for i in range(len(expected_logs)):
                 self.assertEqual(expected_logs[i], lc.output[i])
-        logging.disable(logging.CRITICAL)
+            logging.disable(logging.CRITICAL)
 
     @patch("cpufreq_governors.CPUScalingHandler")
     def test_print_policy_info_no_governor(self, mock_cpuscalinghandler):
@@ -527,7 +534,7 @@ class TestCPUScalingTest(unittest.TestCase):
             cpu_scaling_test.print_policy_info()
             for i in range(len(expected_logs)):
                 self.assertEqual(expected_logs[i], lc.output[i])
-        logging.disable()
+            logging.disable(logging.CRITICAL)
 
     @patch("cpufreq_governors.CPUScalingHandler")
     def test_driver_detect_empty_policies(self, mock_cpuscalinghandler):
@@ -889,6 +896,9 @@ class TestCPUScalingTest(unittest.TestCase):
         result = instance.test_schedutil()
 
         self.assertFalse(result)
+
+    def tearDown(self):
+        logging.disable(logging.NOTSET)
 
 
 if __name__ == "__main__":
