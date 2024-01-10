@@ -122,12 +122,21 @@ class TestCPUSStress(unittest.TestCase):
 
 
 class TestCPUScalingHandler(unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
+        cls.original_stdout = sys.stdout
         suppress_text = io.StringIO()
         sys.stdout = suppress_text
         logging.disable(logging.CRITICAL)
+
+    def setUp(self):
         self.cpu_scaling_info = CPUScalingHandler()
         self.cpu_scaling_info.sys_cpu_dir = "/sys/devices/system/cpu"
+
+    @classmethod
+    def tearDownClass(cls):
+        sys.stdout = cls.original_stdout
+        logging.disable(logging.NOTSET)
 
     @patch("os.listdir")
     def test_get_cpu_policies_success(self, mock_listdir):
@@ -468,13 +477,15 @@ class TestCPUScalingHandler(unittest.TestCase):
 
         self.assertFalse(result)
 
-    def tearDown(self):
-        logging.disable(logging.NOTSET)
-
 
 class TestCPUScalingTest(unittest.TestCase):
-    def setUp(self):
+    @classmethod
+    def setUpClass(cls):
         logging.disable(logging.CRITICAL)
+
+    @classmethod
+    def tearDownClass(cls):
+        logging.disable(logging.NOTSET)
 
     @patch("cpufreq_governors.CPUScalingHandler")
     def test_print_policy_info(self, mock_cpuscalinghandler):
@@ -895,9 +906,6 @@ class TestCPUScalingTest(unittest.TestCase):
         result = instance.test_schedutil()
 
         self.assertFalse(result)
-
-    def tearDown(self):
-        logging.disable(logging.NOTSET)
 
 
 if __name__ == "__main__":
