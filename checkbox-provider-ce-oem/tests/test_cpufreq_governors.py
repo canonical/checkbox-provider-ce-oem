@@ -40,7 +40,7 @@ class TestInitLogger(unittest.TestCase):
         mock_stream_handler_instance.setFormatter.assert_called_with(
             mock_formatter_instance
         )
-        mock_logger.addHandler.assert_called()
+        self.assertEqual(mock_logger.addHandler.call_count, 2)
 
 
 class TestProbeGovernorModule(unittest.TestCase):
@@ -104,8 +104,8 @@ class TestCPUSStress(unittest.TestCase):
         stop_stress_cpus(mock_processes)
 
         for mock_process in mock_processes:
-            mock_process.terminate.assert_called_once()
-            mock_process.wait.assert_called_once()
+            self.assertEqual(mock_process.terminate.call_count, 1)
+            self.assertEqual(mock_process.wait.call_count, 1)
 
     @patch("cpufreq_governors.stress_cpus")
     def test_context_stress_cpus(self, mock_stress_cpus):
@@ -118,7 +118,7 @@ class TestCPUSStress(unittest.TestCase):
         with context_stress_cpus():
             pass
 
-        mock_stress_cpus.assert_called_once()
+        self.assertEqual(mock_stress_cpus.call_count, 1)
 
 
 class TestCPUScalingHandler(unittest.TestCase):
@@ -473,7 +473,6 @@ class TestCPUScalingHandler(unittest.TestCase):
 
 
 class TestCPUScalingTest(unittest.TestCase):
-
     def setUp(self):
         logging.disable(logging.CRITICAL)
 
