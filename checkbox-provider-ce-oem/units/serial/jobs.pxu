@@ -29,7 +29,7 @@ user: root
 category_id: com.canonical.certification::serial
 estimated_duration: 30
 flags: also-after-suspend
-command: serial-remote.py {RS485} --mode client
+command: serial_test.py {RS485} --mode client
 requires: 
     manifest.has_rs485_server == 'True'
     manifest.has_rs485 == 'True'
