@@ -76,6 +76,7 @@ nested_part:
     ce-oem-ethernet-tcp-automated
     com.canonical.certification::eeprom-automated
     com.canonical.certification::rtc-automated
+    ce-oem-digital-io-automated
 
 id: after-suspend-ce-oem-manual
 unit: test plan
@@ -134,6 +135,7 @@ nested_part:
     after-suspend-ce-oem-ethernet-tcp-automated
     com.canonical.certification::after-suspend-eeprom-automated
     com.canonical.certification::after-suspend-rtc-automated
+    after-suspend-ce-oem-digital-io-automated
 
 id: ce-oem-stress
 unit: test plan
@@ -145,3 +147,4 @@ include:
 nested_part:
     ce-oem-cold-boot-stress-test-by-pdu
     ce-oem-ethernet-tcp-stress
+
