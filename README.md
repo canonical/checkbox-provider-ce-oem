@@ -1,3 +1,5 @@
+# This repository has been archived, it's now hosted in the repository [contrib/checkbox-ce-oem](https://github.com/canonical/checkbox/tree/main/contrib/checkbox-ce-oem)
+
 # checkbox-provider-ce-oem
 This is a checkbox provider for both IoT and PC devices. And it will be built as SNAP named *checkbox-ce-oem*.
 You can define specific plugs to connect to it and start using the test jobs and plans included in checkbox-provider-ce-oem.
